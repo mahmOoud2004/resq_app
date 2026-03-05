@@ -12,6 +12,7 @@ import 'package:resq_app/features/auth/presentation/cubit/signup/signup_state.da
 import 'package:resq_app/features/auth/presentation/widgets/build_puttom.dart';
 import 'package:resq_app/features/auth/presentation/widgets/build_text_field.dart';
 import 'package:resq_app/features/auth/presentation/widgets/id_upload.dart';
+import 'package:resq_app/features/auth/presentation/cubit/otp/otp_purpose.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -56,7 +57,14 @@ class _SignupScreenState extends State<SignupScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("Account created successfully")),
             );
-            context.go(Routes.otp, extra: emailController.text.trim());
+
+            context.push(
+              Routes.otp,
+              extra: {
+                "email": emailController.text.trim(),
+                "purpose": OtpPurpose.signup,
+              },
+            );
           }
 
           if (state is SignupError) {
@@ -179,7 +187,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                       const SizedBox(height: 20),
 
-                      /// ROLE SELECTION
+                      /// ROLE
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(

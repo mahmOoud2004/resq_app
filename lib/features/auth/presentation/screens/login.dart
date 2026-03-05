@@ -12,14 +12,20 @@ import 'package:resq_app/features/auth/presentation/cubit/auth_state.dart';
 import 'package:resq_app/features/auth/presentation/widgets/build_puttom.dart';
 import 'package:resq_app/features/auth/presentation/widgets/build_text_field.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   LoginScreen({super.key});
 
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
   final idController = TextEditingController();
+
   final passwordController = TextEditingController();
+
   final phoneController = TextEditingController();
 
-  /// ✅ Validation Function
   String? validateInputs() {
     if (phoneController.text.isEmpty) {
       return "Please enter phone number";
@@ -38,6 +44,13 @@ class LoginScreen extends StatelessWidget {
     }
 
     return null;
+  }
+
+  @override
+  void dispose() {
+    phoneController.dispose();
+    passwordController.dispose();
+    super.dispose();
   }
 
   @override
@@ -62,103 +75,119 @@ class LoginScreen extends StatelessWidget {
         },
         builder: (context, state) {
           return Scaffold(
-            body: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    "ResQ",
-                    style: TextStyle(
-                      fontSize: 34,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
-                    ),
+            resizeToAvoidBottomInset: true,
+            body: SafeArea(
+              child: SingleChildScrollView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: 24,
+                    right: 24,
+                    top: 24,
+                    bottom: MediaQuery.of(context).viewInsets.bottom + 24,
                   ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 40),
 
-                  const SizedBox(height: 20),
-
-                  const Text("Welcome!\nLogin", textAlign: TextAlign.center),
-
-                  const SizedBox(height: 30),
-
-                  AppTextField(hint: "ID Number", controller: idController),
-
-                  const SizedBox(height: 15),
-
-                  AppTextField(
-                    hint: "phone number",
-                    controller: phoneController,
-                  ),
-
-                  const SizedBox(height: 15),
-
-                  AppTextField(
-                    hint: "password",
-                    controller: passwordController,
-                    isPassword: true,
-                  ),
-
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {
-                        context.push(Routes.forgetPassword);
-                      },
-                      child: const Text(
-                        "Forgot password?",
-                        style: TextStyle(color: AppColors.primary),
+                      const Text(
+                        "ResQ",
+                        style: TextStyle(
+                          fontSize: 34,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
 
-                  state is AuthLoading
-                      ? const CircularProgressIndicator()
-                      : AppButton(
-                          text: "Login",
-                          onTap: () {
-                            final error = validateInputs();
+                      const SizedBox(height: 20),
 
-                            /// ❌ لو في مشكلة
-                            if (error != null) {
-                              ScaffoldMessenger.of(
-                                context,
-                              ).showSnackBar(SnackBar(content: Text(error)));
-                              return;
-                            }
+                      const Text(
+                        "Welcome!\nLogin",
+                        textAlign: TextAlign.center,
+                      ),
 
-                            /// ✅ لو البيانات صح
-                            context.read<AuthCubit>().login(
-                              phone: phoneController.text.trim(),
-                              idNumber: idController.text.trim(),
-                              password: passwordController.text.trim(),
-                            );
+                      const SizedBox(height: 30),
+
+                      AppTextField(hint: "ID Number", controller: idController),
+
+                      const SizedBox(height: 15),
+
+                      AppTextField(
+                        hint: "phone number",
+                        controller: phoneController,
+                      ),
+
+                      const SizedBox(height: 15),
+
+                      AppTextField(
+                        hint: "password",
+                        controller: passwordController,
+                        isPassword: true,
+                      ),
+
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () {
+                            context.push(Routes.forgetPassword);
                           },
-                        ),
-
-                  const SizedBox(height: 15),
-
-                  Text.rich(
-                    TextSpan(
-                      text: "Don't have an account? ",
-                      style: const TextStyle(color: Colors.black),
-                      children: [
-                        TextSpan(
-                          text: "create one",
-                          style: const TextStyle(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.bold,
+                          child: const Text(
+                            "Forgot password?",
+                            style: TextStyle(color: AppColors.primary),
                           ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () {
-                              context.push(Routes.signup);
-                            },
                         ),
-                      ],
-                    ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      state is AuthLoading
+                          ? const CircularProgressIndicator()
+                          : AppButton(
+                              text: "Login",
+                              onTap: () {
+                                final error = validateInputs();
+
+                                if (error != null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(error)),
+                                  );
+                                  return;
+                                }
+
+                                context.read<AuthCubit>().login(
+                                  phone: phoneController.text.trim(),
+                                  idNumber: idController.text.trim(),
+                                  password: passwordController.text.trim(),
+                                );
+                              },
+                            ),
+
+                      const SizedBox(height: 15),
+
+                      Text.rich(
+                        TextSpan(
+                          text: "Don't have an account? ",
+                          style: const TextStyle(color: Colors.black),
+                          children: [
+                            TextSpan(
+                              text: "create one",
+                              style: const TextStyle(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  context.push(Routes.signup);
+                                },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           );

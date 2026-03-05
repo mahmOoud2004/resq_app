@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import 'package:resq_app/features/auth/presentation/screens/forget_password_screen.dart';
 import 'package:resq_app/features/auth/presentation/screens/login.dart';
 import 'package:resq_app/features/auth/presentation/screens/otp_screen.dart';
+import 'package:resq_app/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:resq_app/features/auth/presentation/screens/signup.dart';
 import 'package:resq_app/features/home/presentation/screens/home_screen.dart';
 import 'package:resq_app/features/splash/presentation/view/splash.dart';
@@ -10,12 +11,12 @@ import 'route_names.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: Routes.splash,
-
   routes: [
     GoRoute(
       path: Routes.splash,
       builder: (context, state) => const SplashScreen(),
     ),
+
     GoRoute(path: Routes.login, builder: (context, state) => LoginScreen()),
 
     GoRoute(path: Routes.signup, builder: (context, state) => SignupScreen()),
@@ -24,13 +25,26 @@ final GoRouter appRouter = GoRouter(
 
     GoRoute(
       path: Routes.forgetPassword,
-      builder: (context, state) => ForgetPasswordScreen(),
+      builder: (context, state) => const ForgetPasswordScreen(),
     ),
+
+    /// OTP SCREEN
     GoRoute(
       path: Routes.otp,
       builder: (context, state) {
-        final email = state.extra as String;
-        return OtpScreen(email: email);
+        final data = state.extra as Map;
+
+        return OtpScreen(email: data["email"], purpose: data["purpose"]);
+      },
+    ),
+
+    /// RESET PASSWORD SCREEN
+    GoRoute(
+      path: Routes.resetPassword,
+      builder: (context, state) {
+        final data = state.extra as Map;
+
+        return ResetPasswordScreen(email: data["email"], otp: data["otp"]);
       },
     ),
   ],

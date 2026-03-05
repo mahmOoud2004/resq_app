@@ -6,6 +6,7 @@ class ApiConstants {
   static const String register = "/register";
   static const String verifyOtp = "/verify-otp";
   static const String forgotPassword = "/forgot-password";
+  static const String verifyResetOtp = "/verify-reset-otp";
   static const String resetPassword = "/reset-password";
 
   static const String profile = "/profile";

@@ -20,4 +20,16 @@ class AuthRepository {
 
     await storage.saveToken(result.token?.toString() ?? '');
   }
+
+  Future<void> forgotPassword(String email) async {
+    await remote.forgotPassword(email);
+  }
+
+  Future<void> resetPassword({
+    required String email,
+    required String password,
+    required String otp,
+  }) async {
+    await remote.resetPassword(email: email, password: password, otp: otp);
+  }
 }

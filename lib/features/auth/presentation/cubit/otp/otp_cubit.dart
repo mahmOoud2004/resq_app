@@ -9,7 +9,11 @@ class OtpCubit extends Cubit<OtpState> {
 
   final Dio dio = DioClient().dio;
 
-  Future<void> verifyOtp({required String email, required String otp}) async {
+  /// OTP verification (signup)
+  Future<void> verifySignupOtp({
+    required String email,
+    required String otp,
+  }) async {
     emit(OtpLoading());
 
     try {
@@ -18,11 +22,24 @@ class OtpCubit extends Cubit<OtpState> {
         data: {"email": email, "otp": otp},
       );
 
-      print("OTP RESPONSE: ${response.data}");
+      print("VERIFY SIGNUP OTP RESPONSE: ${response.data}");
 
       emit(OtpSuccess());
     } catch (e) {
-      print("OTP ERROR: $e");
+      print("OTP SIGNUP ERROR: $e");
+      emit(OtpError("Invalid OTP"));
+    }
+  }
+
+  /// OTP verification (reset password)
+  /// مفيش API هنا — بس بنتأكد إن OTP مكتوب
+  Future<void> verifyResetOtp({
+    required String email,
+    required String otp,
+  }) async {
+    if (otp.length == 4) {
+      emit(OtpSuccess());
+    } else {
       emit(OtpError("Invalid OTP"));
     }
   }
