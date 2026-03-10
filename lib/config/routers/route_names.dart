@@ -6,4 +6,8 @@ class Routes {
   static const forgetPassword = '/forgetPassword';
   static const otp = '/otp';
   static const resetPassword = '/resetPassword';
+
+  static const acount = '/account';
+  static const support = '/support';
+  static const terms = '/terms';
 }

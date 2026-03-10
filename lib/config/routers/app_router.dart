@@ -4,13 +4,18 @@ import 'package:resq_app/features/auth/presentation/screens/login.dart';
 import 'package:resq_app/features/auth/presentation/screens/otp_screen.dart';
 import 'package:resq_app/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:resq_app/features/auth/presentation/screens/signup.dart';
-import 'package:resq_app/features/home/presentation/screens/home_screen.dart';
+import 'package:resq_app/features/navigation/presentation/screen/main_screen.dart';
+import 'package:resq_app/features/profile/presentation/screens/account_screen.dart';
+import 'package:resq_app/features/profile/presentation/screens/support_screen.dart';
+import 'package:resq_app/features/profile/presentation/screens/terms_screen.dart';
 import 'package:resq_app/features/splash/presentation/view/splash.dart';
-
 import 'route_names.dart';
 
+const bool skipAuth = true;
+
 final GoRouter appRouter = GoRouter(
-  initialLocation: Routes.splash,
+  // initialLocation: Routes.splash,
+  initialLocation: skipAuth ? Routes.home : Routes.splash,
   routes: [
     GoRoute(
       path: Routes.splash,
@@ -21,7 +26,7 @@ final GoRouter appRouter = GoRouter(
 
     GoRoute(path: Routes.signup, builder: (context, state) => SignupScreen()),
 
-    GoRoute(path: Routes.home, builder: (context, state) => const HomeScreen()),
+    GoRoute(path: Routes.home, builder: (context, state) => const MainScreen()),
 
     GoRoute(
       path: Routes.forgetPassword,
@@ -46,6 +51,20 @@ final GoRouter appRouter = GoRouter(
 
         return ResetPasswordScreen(email: data["email"], otp: data["otp"]);
       },
+    ),
+    GoRoute(
+      path: Routes.acount,
+      builder: (context, state) => const AccountScreen(),
+    ),
+
+    GoRoute(
+      path: Routes.support,
+      builder: (context, state) => const SupportScreen(),
+    ),
+
+    GoRoute(
+      path: Routes.terms,
+      builder: (context, state) => const TermsScreen(),
     ),
   ],
 );
