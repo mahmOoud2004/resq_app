@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:resq_app/config/routers/route_names.dart';
+import 'package:resq_app/core/storage/token_storage.dart';
+import 'package:resq_app/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:resq_app/features/profile/presentation/widgets/profile_item_card.dart';
 import 'package:resq_app/features/profile/presentation/widgets/theme_card.dart';
 import '../widgets/profile_header.dart';
@@ -29,7 +32,10 @@ class ProfileScreen extends StatelessWidget {
                 subtitle: "Manage personal information",
                 onTap: () {
                   // Navigate to Account Screen
-                  context.push(Routes.acount);
+                  context.push(
+                    Routes.acount,
+                    extra: context.read<ProfileBloc>(),
+                  );
                 },
               ),
 
@@ -68,7 +74,13 @@ class ProfileScreen extends StatelessWidget {
                 title: "Log Out",
                 subtitle: "Sign out from the account",
                 color: Colors.red,
-                onTap: () {},
+                onTap: () async {
+                  final tokenStorage = TokenStorage();
+
+                  await tokenStorage.clear();
+
+                  context.go(Routes.login);
+                },
               ),
             ],
           ),

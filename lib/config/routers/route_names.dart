@@ -8,6 +8,8 @@ class Routes {
   static const resetPassword = '/resetPassword';
 
   static const acount = '/account';
+  static const editProfile = '/editProfile'; // NEW
+
   static const support = '/support';
   static const terms = '/terms';
 }

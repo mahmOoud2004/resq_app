@@ -11,7 +11,10 @@ class TermsScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFF07142A),
         elevation: 0,
-        title: const Text("Terms & Policies"),
+        title: const Text(
+          "Terms & Policies",
+          style: TextStyle(color: Colors.white),
+        ),
       ),
 
       body: Padding(

@@ -14,6 +14,7 @@ class UserHomeScreen extends StatefulWidget {
 
 class _UserHomeScreenState extends State<UserHomeScreen> {
   bool showEmergencyOptions = false;
+  bool hasActiveRequest = false;
 
   void onEmergencyPressed() {
     setState(() {
@@ -50,7 +51,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 
                   const SizedBox(height: 40),
 
-                  const ActiveRequestCard(),
+                  if (hasActiveRequest) const ActiveRequestCard(),
 
                   const SizedBox(height: 40),
                 ],

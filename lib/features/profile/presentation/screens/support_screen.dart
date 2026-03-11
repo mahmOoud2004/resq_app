@@ -11,7 +11,10 @@ class SupportScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFF07142A),
         elevation: 0,
-        title: const Text("Support & Information"),
+        title: const Text(
+          "Support & Information",
+          style: TextStyle(color: Colors.white),
+        ),
       ),
 
       body: Padding(
