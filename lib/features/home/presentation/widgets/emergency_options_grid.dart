@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 
 class EmergencyOptionsGrid extends StatelessWidget {
-  const EmergencyOptionsGrid({super.key});
+  final List<String> selected;
+  final Function(String) onSelect;
+
+  const EmergencyOptionsGrid({
+    super.key,
+    required this.selected,
+    required this.onSelect,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -14,29 +21,38 @@ class EmergencyOptionsGrid extends StatelessWidget {
         mainAxisSpacing: 14,
         childAspectRatio: 1.3,
       ),
-      children: const [
+      children: [
         EmergencyOptionCard(
           title: "Medical Help",
           icon: Icons.medical_services,
-          color: Color(0xFFFF4B4B),
+          color: const Color(0xFFFF4B4B),
+          service: "medical",
+          selected: selected.contains("medical"),
+          onTap: onSelect,
         ),
-
         EmergencyOptionCard(
           title: "Fire Fighter",
           icon: Icons.local_fire_department,
-          color: Color(0xFFFF7A00),
+          color: const Color(0xFFFF7A00),
+          service: "fire",
+          selected: selected.contains("fire"),
+          onTap: onSelect,
         ),
-
         EmergencyOptionCard(
           title: "Emergency Ride",
           icon: Icons.local_taxi,
-          color: Color(0xFFFF7A00),
+          color: const Color(0xFFFF7A00),
+          service: "tow_truck",
+          selected: selected.contains("tow_truck"),
+          onTap: onSelect,
         ),
-
         EmergencyOptionCard(
           title: "Police Help",
           icon: Icons.shield,
-          color: Color(0xFF2563EB),
+          color: const Color(0xFF2563EB),
+          service: "police",
+          selected: selected.contains("police"),
+          onTap: onSelect,
         ),
       ],
     );
@@ -47,65 +63,87 @@ class EmergencyOptionCard extends StatelessWidget {
   final String title;
   final IconData icon;
   final Color color;
+  final String service;
+  final bool selected;
+  final Function(String) onTap;
 
   const EmergencyOptionCard({
     super.key,
     required this.title,
     required this.icon,
     required this.color,
+    required this.service,
+    required this.selected,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+    return GestureDetector(
+      onTap: () => onTap(service),
 
-        /// gradient background مثل التصميم
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [color.withOpacity(.15), const Color(0xFF13294B)],
+      child: AnimatedScale(
+        duration: const Duration(milliseconds: 200),
+        scale: selected ? 1.05 : 1,
+
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          padding: const EdgeInsets.all(18),
+
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+
+            /// Gradient رجعناه
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: selected
+                  ? [color.withOpacity(.35), const Color(0xFF13294B)]
+                  : [color.withOpacity(.15), const Color(0xFF13294B)],
+            ),
+
+            /// border
+            border: Border.all(
+              color: selected ? color : color.withOpacity(.7),
+              width: 1.5,
+            ),
+
+            /// glow
+            boxShadow: [
+              if (selected)
+                BoxShadow(
+                  color: color.withOpacity(.4),
+                  blurRadius: 25,
+                  spreadRadius: 1,
+                ),
+            ],
+          ),
+
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: Colors.white, size: 26),
+              ),
+
+              const SizedBox(height: 14),
+
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
         ),
-
-        /// border ملون
-        border: Border.all(color: color.withOpacity(.7), width: 1.5),
-
-        /// glow خفيف
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(.15),
-            blurRadius: 20,
-            spreadRadius: 1,
-          ),
-        ],
-      ),
-
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          /// مربع الأيقونة
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: Colors.white, size: 26),
-          ),
-
-          const SizedBox(height: 14),
-
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
       ),
     );
   }

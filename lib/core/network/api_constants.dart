@@ -12,4 +12,6 @@ class ApiConstants {
   static const String profile = "/profile";
   static const String logout = "/logout";
   static const String updateUser = "/update-user";
+
+  static const String createEmergency = "/emergency/create";
 }

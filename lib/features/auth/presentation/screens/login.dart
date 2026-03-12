@@ -105,6 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       const Text(
                         "Welcome!\nLogin",
+                        style: TextStyle(fontSize: 16, color: Colors.white),
                         textAlign: TextAlign.center,
                       ),
 
@@ -169,7 +170,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Text.rich(
                         TextSpan(
                           text: "Don't have an account? ",
-                          style: const TextStyle(color: Colors.black),
+                          style: const TextStyle(color: Colors.white),
                           children: [
                             TextSpan(
                               text: "create one",

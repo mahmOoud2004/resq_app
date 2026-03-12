@@ -1,10 +1,12 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+
 import 'package:resq_app/features/auth/presentation/screens/forget_password_screen.dart';
 import 'package:resq_app/features/auth/presentation/screens/login.dart';
 import 'package:resq_app/features/auth/presentation/screens/otp_screen.dart';
 import 'package:resq_app/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:resq_app/features/auth/presentation/screens/signup.dart';
+import 'package:resq_app/features/emergency/domain/usecase/create_emergency_usecase.dart';
 import 'package:resq_app/features/navigation/presentation/screen/main_screen.dart';
 import 'package:resq_app/features/profile/data/datasources/profile_remote_datasource.dart';
 import 'package:resq_app/features/profile/data/repositories/profile_repository_impl.dart';
@@ -15,10 +17,16 @@ import 'package:resq_app/features/profile/presentation/screens/edit_profile_scre
 import 'package:resq_app/features/profile/presentation/screens/support_screen.dart';
 import 'package:resq_app/features/profile/presentation/screens/terms_screen.dart';
 import 'package:resq_app/features/profile/presentation/edit_profile/edit_profile_bloc.dart';
+
 import 'package:resq_app/features/splash/presentation/view/splash.dart';
+
+/// EMERGENCY IMPORTS
+import 'package:resq_app/features/emergency/data/repositories/emergency_repository_impl.dart';
+import 'package:resq_app/features/emergency/presentation/bloc/emergency_bloc.dart';
+
 import 'route_names.dart';
 
-const bool skipAuth = false;
+const bool skipAuth = true;
 
 final GoRouter appRouter = GoRouter(
   initialLocation: skipAuth ? Routes.home : Routes.splash,
@@ -36,15 +44,29 @@ final GoRouter appRouter = GoRouter(
     /// SIGNUP
     GoRoute(path: Routes.signup, builder: (context, state) => SignupScreen()),
 
-    /// HOME + PROFILE BLOC
+    /// HOME
     GoRoute(
       path: Routes.home,
-      builder: (context, state) => BlocProvider(
-        create: (context) =>
-            ProfileBloc(ProfileRepositoryImpl(ProfileRemoteDataSourceImpl()))
-              ..add(GetProfileEvent()),
-        child: const MainScreen(),
-      ),
+      builder: (context, state) {
+        return MultiBlocProvider(
+          providers: [
+            /// PROFILE BLOC
+            BlocProvider(
+              create: (context) => ProfileBloc(
+                ProfileRepositoryImpl(ProfileRemoteDataSourceImpl()),
+              )..add(GetProfileEvent()),
+            ),
+
+            /// EMERGENCY BLOC
+            BlocProvider(
+              create: (context) => EmergencyBloc(
+                CreateEmergencyUseCase(EmergencyRepositoryImpl()),
+              ),
+            ),
+          ],
+          child: const MainScreen(),
+        );
+      },
     ),
 
     /// FORGET PASSWORD
@@ -77,8 +99,6 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: Routes.acount,
       builder: (context, state) {
-        final bloc = state.extra as ProfileBloc;
-
         return AccountScreen();
       },
     ),

@@ -86,7 +86,7 @@ class OtpScreen extends StatelessWidget {
 
                       const Text(
                         "OTP Verification",
-                        style: TextStyle(fontSize: 20),
+                        style: TextStyle(color: Colors.white, fontSize: 20),
                       ),
 
                       const SizedBox(height: 10),

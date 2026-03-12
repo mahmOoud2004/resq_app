@@ -19,7 +19,15 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       title: 'resQ App',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        scaffoldBackgroundColor: const Color(0xFF07142A),
+
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF07142A),
+          systemOverlayStyle: SystemUiOverlayStyle(
+            statusBarColor: Color(0xFF07142A),
+            statusBarIconBrightness: Brightness.light,
+          ),
+        ),
       ),
       routerConfig: appRouter,
     );

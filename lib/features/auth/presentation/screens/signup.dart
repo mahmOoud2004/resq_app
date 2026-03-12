@@ -94,7 +94,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
 
                       const SizedBox(height: 20),
-                      const Text("Create Account"),
+                      const Text("Create Account", style: TextStyle()),
                       const SizedBox(height: 30),
 
                       AppTextField(
@@ -246,6 +246,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       Text.rich(
                         TextSpan(
                           text: "Already have an account? ",
+                          style: const TextStyle(color: Colors.white),
                           children: [
                             TextSpan(
                               text: "Login",

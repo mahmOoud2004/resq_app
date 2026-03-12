@@ -68,7 +68,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                 const Text(
                   "Forget Password",
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 20),
+                  style: TextStyle(color: Colors.white, fontSize: 20),
                 ),
 
                 const SizedBox(height: 10),
@@ -121,7 +121,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                 Text.rich(
                   TextSpan(
                     text: "Remember your password? ",
-                    style: const TextStyle(color: Colors.black),
+                    style: const TextStyle(color: Colors.white),
                     children: [
                       TextSpan(
                         text: "Login",
