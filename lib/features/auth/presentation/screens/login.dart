@@ -61,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
       child: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
-            context.go(Routes.home);
+            context.go("/auth-gate");
           }
           if (state is AuthNeedsOtp) {
             context.go(Routes.otp, extra: state.email);

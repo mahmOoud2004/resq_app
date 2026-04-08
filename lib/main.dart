@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFF07142A),
 
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF07142A),
+          backgroundColor: Color.fromARGB(255, 44, 46, 49),
           systemOverlayStyle: SystemUiOverlayStyle(
             statusBarColor: Color(0xFF07142A),
             statusBarIconBrightness: Brightness.light,

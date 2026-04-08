@@ -6,7 +6,11 @@ import 'package:resq_app/features/auth/presentation/screens/login.dart';
 import 'package:resq_app/features/auth/presentation/screens/otp_screen.dart';
 import 'package:resq_app/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:resq_app/features/auth/presentation/screens/signup.dart';
+import 'package:resq_app/features/driver_emergency/presentation/cubit/driver_emergency_cubit.dart';
 import 'package:resq_app/features/emergency/domain/usecase/create_emergency_usecase.dart';
+import 'package:resq_app/features/home/presentation/screens/driver_home_screen.dart';
+import 'package:resq_app/features/home/presentation/widgets_driver/driver_request_details_screen.dart';
+import 'package:resq_app/features/navigation/presentation/screen/auth_gate_screen.dart';
 import 'package:resq_app/features/navigation/presentation/screen/main_screen.dart';
 import 'package:resq_app/features/profile/data/datasources/profile_remote_datasource.dart';
 import 'package:resq_app/features/profile/data/repositories/profile_repository_impl.dart';
@@ -26,10 +30,10 @@ import 'package:resq_app/features/emergency/presentation/bloc/emergency_bloc.dar
 
 import 'route_names.dart';
 
-const bool skipAuth = true;
+const bool skipAuth = false;
 
 final GoRouter appRouter = GoRouter(
-  initialLocation: skipAuth ? Routes.home : Routes.splash,
+  initialLocation: skipAuth ? Routes.driverHome : "/auth-gate",
 
   routes: [
     /// SPLASH
@@ -126,6 +130,30 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: Routes.terms,
       builder: (context, state) => const TermsScreen(),
+    ),
+
+    /// DRIVER HOME
+    GoRoute(
+      path: Routes.driverHome,
+      builder: (context, state) {
+        return const DriverHomeScreen();
+      },
+    ),
+
+    GoRoute(
+      path: '/driverRequestDetails',
+      builder: (context, state) {
+        final id = state.extra as int;
+
+        return BlocProvider.value(
+          value: context.read<DriverEmergencyCubit>(),
+          child: DriverRequestDetailsScreen(requestId: id),
+        );
+      },
+    ),
+    GoRoute(
+      path: "/auth-gate",
+      builder: (context, state) => const AuthGateScreen(),
     ),
   ],
 );

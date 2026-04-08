@@ -5,6 +5,8 @@ class UserModel {
   final String email;
   final String nationalId;
 
+  final String role; // ⭐ الجديد
+
   final String? profileImage;
   final String? idCardImage;
 
@@ -17,6 +19,7 @@ class UserModel {
     required this.phone,
     required this.email,
     required this.nationalId,
+    required this.role, // ⭐
     this.profileImage,
     this.idCardImage,
   });
@@ -31,6 +34,7 @@ class UserModel {
       phone: json["phone"] ?? "",
       email: json["email"] ?? "",
       nationalId: json["id_number"] ?? "",
+      role: json["role"] ?? "user", // ⭐
 
       profileImage: profilePath,
       idCardImage: idCardPath != null ? "$_baseImageUrl$idCardPath" : null,

@@ -6,6 +6,7 @@ import 'package:resq_app/core/storage/token_storage.dart';
 import 'package:resq_app/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:resq_app/features/profile/presentation/widgets/profile_item_card.dart';
 import 'package:resq_app/features/profile/presentation/widgets/theme_card.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/profile_header.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -77,7 +78,12 @@ class ProfileScreen extends StatelessWidget {
                 onTap: () async {
                   final tokenStorage = TokenStorage();
 
+                  /// مسح التوكن
                   await tokenStorage.clear();
+
+                  /// مسح role
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.remove("role");
 
                   context.go(Routes.login);
                 },

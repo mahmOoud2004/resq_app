@@ -12,4 +12,9 @@ class Routes {
 
   static const support = '/support';
   static const terms = '/terms';
+
+  /// DRIVER
+  static const driverHome = '/driverHome';
+  static const driverRequestDetails = '/driverRequestDetails';
+  static const driverNavigation = '/driverNavigation';
 }

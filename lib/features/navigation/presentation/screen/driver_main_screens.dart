@@ -2,34 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:resq_app/features/Chatbot/presentation/screens/chatbot_page.dart';
-import 'package:resq_app/features/home/presentation/screens/user_home_screen.dart';
+import 'package:resq_app/features/home/presentation/screens/driver_home_screen.dart';
 import 'package:resq_app/features/map/presentation/screens/map_screen.dart';
 import 'package:resq_app/features/profile/presentation/screens/profile_screen.dart';
 
-import 'package:resq_app/features/emergency/presentation/bloc/emergency_bloc.dart';
-import 'package:resq_app/features/emergency/domain/usecase/create_emergency_usecase.dart';
-import 'package:resq_app/features/emergency/data/repositories/emergency_repository_impl.dart';
-
 import 'package:resq_app/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:resq_app/features/profile/presentation/bloc/profile_event.dart';
+
 import 'package:resq_app/features/profile/data/datasources/profile_remote_datasource.dart';
 import 'package:resq_app/features/profile/data/repositories/profile_repository_impl.dart';
 
-class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+class DriverMainScreen extends StatefulWidget {
+  const DriverMainScreen({super.key});
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  State<DriverMainScreen> createState() => _DriverMainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _DriverMainScreenState extends State<DriverMainScreen> {
   int currentIndex = 0;
 
   final List<Widget> screens = [
-    UserHomeScreen(),
-    MapScreen(),
-    ChatbotPage(),
-    ProfileScreen(),
+    const DriverHomeScreen(),
+    const MapScreen(),
+    const ChatbotPage(),
+    const ProfileScreen(),
   ];
 
   void onTabTapped(int index) {
@@ -40,24 +37,10 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        /// Emergency Bloc
-        BlocProvider(
-          create: (_) {
-            final repository = EmergencyRepositoryImpl();
-            final useCase = CreateEmergencyUseCase(repository);
-            return EmergencyBloc(useCase);
-          },
-        ),
-
-        /// Profile Bloc
-        BlocProvider(
-          create: (_) =>
-              ProfileBloc(ProfileRepositoryImpl(ProfileRemoteDataSourceImpl()))
-                ..add(GetProfileEvent()),
-        ),
-      ],
+    return BlocProvider(
+      create: (_) =>
+          ProfileBloc(ProfileRepositoryImpl(ProfileRemoteDataSourceImpl()))
+            ..add(GetProfileEvent()),
       child: Scaffold(
         body: screens[currentIndex],
         bottomNavigationBar: BottomNavigationBar(

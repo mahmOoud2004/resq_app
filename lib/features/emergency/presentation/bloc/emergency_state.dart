@@ -6,7 +6,11 @@ class EmergencyInitial extends EmergencyState {}
 
 class EmergencyLoading extends EmergencyState {}
 
-class EmergencySuccess extends EmergencyState {}
+class EmergencyActive extends EmergencyState {
+  final String serviceType;
+
+  EmergencyActive(this.serviceType);
+}
 
 class EmergencyError extends EmergencyState {
   final String message;

@@ -17,9 +17,8 @@ class EmergencyBloc extends Bloc<EmergencyEvent, EmergencyState> {
           lat: event.lat,
           lng: event.lng,
         );
-        print("Request sent successfully");
 
-        emit(EmergencySuccess());
+        emit(EmergencyActive(event.serviceType));
       } catch (e) {
         emit(EmergencyError(e.toString()));
       }

@@ -19,7 +19,7 @@ class EmergencyOptionsGrid extends StatelessWidget {
         crossAxisCount: 2,
         crossAxisSpacing: 14,
         mainAxisSpacing: 14,
-        childAspectRatio: 1.3,
+        childAspectRatio: 1.2,
       ),
       children: [
         EmergencyOptionCard(
