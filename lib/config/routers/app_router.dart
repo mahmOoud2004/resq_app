@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:resq_app/features/admin/presentation/screens/admin_dashboard_screen.dart';
 
 import 'package:resq_app/features/auth/presentation/screens/forget_password_screen.dart';
 import 'package:resq_app/features/auth/presentation/screens/login.dart';
@@ -10,7 +11,10 @@ import 'package:resq_app/features/driver_emergency/presentation/cubit/driver_eme
 import 'package:resq_app/features/emergency/domain/usecase/create_emergency_usecase.dart';
 import 'package:resq_app/features/home/presentation/screens/driver_home_screen.dart';
 import 'package:resq_app/features/home/presentation/widgets_driver/driver_request_details_screen.dart';
+import 'package:resq_app/features/navigation/presentation/screen/admin_main_screen.dart';
 import 'package:resq_app/features/navigation/presentation/screen/auth_gate_screen.dart';
+import 'package:resq_app/features/navigation/presentation/screen/driver_main_screens.dart'
+    show DriverMainScreen;
 import 'package:resq_app/features/navigation/presentation/screen/main_screen.dart';
 import 'package:resq_app/features/profile/data/datasources/profile_remote_datasource.dart';
 import 'package:resq_app/features/profile/data/repositories/profile_repository_impl.dart';
@@ -154,6 +158,16 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: "/auth-gate",
       builder: (context, state) => const AuthGateScreen(),
+    ),
+    GoRoute(
+      path: "/driver-main",
+      builder: (context, state) => const DriverMainScreen(),
+    ),
+
+    // ADMIN HOME
+    GoRoute(
+      path: "/admin",
+      builder: (context, state) => const AdminMainScreen(),
     ),
   ],
 );

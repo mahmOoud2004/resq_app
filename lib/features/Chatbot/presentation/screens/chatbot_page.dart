@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dio/dio.dart';
-import 'package:resq_app/features/Chatbot/data/datasource/chatbot_remote_datasource.dart';
-import 'package:resq_app/features/Chatbot/data/models/chat_message_model.dart';
+
+import '../../data/datasource/chatbot_remote_datasource.dart';
+import '../../data/models/chat_message_model.dart';
+import '../../data/models/chatbot_response_model.dart';
+
+import '../widgets/chat_bubble.dart';
+import '../widgets/dispatch_button.dart';
+
+import '../../../emergency/presentation/bloc/emergency_bloc.dart';
 
 class ChatbotPage extends StatefulWidget {
   const ChatbotPage({super.key});
@@ -11,78 +19,74 @@ class ChatbotPage extends StatefulWidget {
 }
 
 class _ChatbotPageState extends State<ChatbotPage> {
-  final TextEditingController controller = TextEditingController();
-  final ScrollController scrollController = ScrollController();
+  final controller = TextEditingController();
+  final scrollController = ScrollController();
 
-  final ChatbotRemoteDataSource chatbotService = ChatbotRemoteDataSource(Dio());
+  final chatbotService = ChatbotRemoteDatasource(Dio());
 
-  final List<Map<String, dynamic>> messages = [];
+  List<ChatMessageModel> messages = [];
+
+  Map<String, dynamic>? emergencyData;
 
   void sendMessage() async {
     if (controller.text.isEmpty) return;
 
-    final userMessage = controller.text;
+    final text = controller.text;
 
     setState(() {
-      messages.add({"text": userMessage, "isUser": true, "time": "Now"});
+      messages.add(ChatMessageModel(text: text, isUser: true));
     });
 
     controller.clear();
 
-    try {
-      ChatbotResponseModel response = await chatbotService.sendMessage(
-        userId: "1",
-        message: userMessage,
-        lat: 30.044420,
-        lng: 31.235712,
-      );
+    ChatbotResponseModel response = await chatbotService.sendMessage(
+      userId: "1",
+      message: text,
+      lat: 30.0444,
+      lng: 31.2357,
+    );
 
-      setState(() {
-        messages.add({
-          "text": response.botResponse,
-          "isUser": false,
-          "time": "Now",
-        });
-      });
+    print("=========== PARSED RESPONSE ===========");
+    print("Bot Response: ${response.botResponse}");
+    print("Is Dispatched: ${response.isDispatched}");
+    print("Emergency Data: ${response.dispatchData}");
+    print("=======================================");
 
-      /// لو الطلب اتبعت
-      if (response.isDispatched == true) {
-        final dispatchData = response.dispatchData;
+    setState(() {
+      messages.add(ChatMessageModel(text: response.botResponse, isUser: false));
 
-        print("Emergency Request Data:");
-        print(dispatchData);
-
-        /// هنا تقدر تبعت الطلب ل feature الطوارئ
+      if (response.isDispatched) {
+        emergencyData = response.dispatchData;
       }
+    });
+  }
 
-      Future.delayed(const Duration(milliseconds: 300), () {
-        scrollController.animateTo(
-          scrollController.position.maxScrollExtent + 100,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      });
-    } catch (e) {
-      setState(() {
-        messages.add({
-          "text": "Something went wrong",
-          "isUser": false,
-          "time": "Now",
-        });
-      });
-    }
+  void sendEmergency() {
+    if (emergencyData == null) return;
+
+    context.read<EmergencyBloc>().add(
+      SendEmergencyEvent(serviceType: "ambulance", lat: 30.0444, lng: 31.2357),
+    );
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("Emergency request sent")));
+
+    setState(() {
+      emergencyData = null;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xff0B1A2B),
+
       appBar: AppBar(
         backgroundColor: const Color(0xff0B1A2B),
-        elevation: 0,
-        leading: const BackButton(color: Colors.white),
         title: const Text("ResQ Assistant"),
       ),
+
       body: Column(
         children: [
           Expanded(
@@ -93,33 +97,17 @@ class _ChatbotPageState extends State<ChatbotPage> {
               itemBuilder: (context, index) {
                 final msg = messages[index];
 
-                return Align(
-                  alignment: msg["isUser"]
-                      ? Alignment.centerRight
-                      : Alignment.centerLeft,
-                  child: Container(
-                    padding: const EdgeInsets.all(14),
-                    margin: const EdgeInsets.only(bottom: 10),
-                    decoration: BoxDecoration(
-                      color: msg["isUser"]
-                          ? Colors.blue
-                          : const Color(0xff1E2C3F),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Text(
-                      msg["text"],
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ),
-                );
+                return ChatBubble(message: msg.text, isUser: msg.isUser);
               },
             ),
           ),
 
-          /// Input
+          /// زر الطوارئ يظهر هنا
+          if (emergencyData != null) DispatchButton(onTap: sendEmergency),
+
           Container(
             padding: const EdgeInsets.all(12),
-            decoration: const BoxDecoration(color: Color(0xff132338)),
+            color: const Color(0xff132338),
             child: Row(
               children: [
                 Expanded(
@@ -127,7 +115,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                     controller: controller,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
-                      hintText: "Describe your situation...",
+                      hintText: "Describe your emergency...",
                       hintStyle: const TextStyle(color: Colors.white54),
                       filled: true,
                       fillColor: const Color(0xff1E2C3F),
@@ -138,16 +126,12 @@ class _ChatbotPageState extends State<ChatbotPage> {
                     ),
                   ),
                 ),
+
                 const SizedBox(width: 8),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: IconButton(
-                    icon: const Icon(Icons.send, color: Colors.white),
-                    onPressed: sendMessage,
-                  ),
+
+                IconButton(
+                  icon: const Icon(Icons.send, color: Colors.white),
+                  onPressed: sendMessage,
                 ),
               ],
             ),

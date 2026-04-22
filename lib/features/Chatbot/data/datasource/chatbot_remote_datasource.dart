@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
-import 'package:resq_app/features/Chatbot/data/models/chat_message_model.dart';
+import '../models/chatbot_response_model.dart';
 
-class ChatbotRemoteDataSource {
+class ChatbotRemoteDatasource {
   final Dio dio;
 
-  ChatbotRemoteDataSource(this.dio);
+  ChatbotRemoteDatasource(this.dio);
 
   Future<ChatbotResponseModel> sendMessage({
     required String userId,
@@ -12,10 +12,26 @@ class ChatbotRemoteDataSource {
     required double lat,
     required double lng,
   }) async {
+    print("=========== CHATBOT REQUEST ===========");
+    print("User ID: $userId");
+    print("Message: $message");
+    print("Lat: $lat");
+    print("Lng: $lng");
+
     final response = await dio.post(
       "https://subpyramidical-nonsynodic-isiah.ngrok-free.dev/api/v1/mobile/chat",
       data: {"user_id": userId, "message": message, "lat": lat, "lng": lng},
+      options: Options(
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
+        },
+      ),
     );
+
+    print("=========== SERVER RESPONSE ===========");
+    print(response.data);
+    print("=======================================");
 
     return ChatbotResponseModel.fromJson(response.data);
   }

@@ -14,4 +14,11 @@ class ApiConstants {
   static const String updateUser = "/update-user";
 
   static const String createEmergency = "/emergency/create";
+
+  static const String adminStats = "/admin/stats";
+  static const String pendingUsers = "/admin/pending-users";
+  static const String approveUser = "/admin/approve-user";
+  static const String blockUser = "/admin/block-user";
+  static const String activeEmergencies = "/admin/active-emergencies";
+  static const String cancelEmergency = "/admin/cancel-emergency";
 }
