@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:resq_app/features/emergency/presentation/bloc/emergency_bloc.dart';
@@ -6,7 +7,6 @@ import 'package:resq_app/features/home/presentation/widgets_user/home_header.dar
 import 'package:resq_app/features/home/presentation/widgets_user/location_card.dart';
 import 'package:resq_app/features/home/presentation/widgets_user/active_request_card.dart';
 import 'package:resq_app/features/home/presentation/widgets_user/emergency_options_grid.dart';
-
 import 'package:resq_app/features/map/services/location_service.dart';
 
 class UserHomeScreen extends StatefulWidget {
@@ -20,55 +20,62 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   final LocationService _locationService = LocationService();
 
   bool showEmergencyOptions = false;
-
   List<String> selectedServices = [];
 
   String address = "Detecting location...";
   double? latitude;
   double? longitude;
 
+  Timer? timer;
+
   @override
   void initState() {
     super.initState();
     _loadLocation();
+
+    final bloc = context.read<EmergencyBloc>();
+
+    bloc.add(GetActiveRequestEvent());
+
+    timer = Timer.periodic(const Duration(seconds: 3), (_) {
+      bloc.add(GetActiveRequestEvent());
+    });
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadLocation() async {
-    try {
-      final position = await _locationService.getCurrentLocation();
+    final position = await _locationService.getCurrentLocation();
 
-      final addr = await _locationService.getAddressFromLatLng(
-        position.latitude,
-        position.longitude,
-      );
+    final addr = await _locationService.getAddressFromLatLng(
+      position.latitude,
+      position.longitude,
+    );
 
-      if (!mounted) return;
+    if (!mounted) return;
 
-      setState(() {
-        latitude = position.latitude;
-        longitude = position.longitude;
-        address = addr;
-      });
-    } catch (e) {
-      debugPrint(e.toString());
-    }
+    setState(() {
+      latitude = position.latitude;
+      longitude = position.longitude;
+      address = addr;
+    });
   }
 
   void toggleService(String service) {
     setState(() {
-      if (selectedServices.contains(service)) {
-        selectedServices.remove(service);
-      } else {
-        selectedServices.add(service);
-      }
+      selectedServices.contains(service)
+          ? selectedServices.remove(service)
+          : selectedServices.add(service);
     });
   }
 
   void onEmergencyPressed() {
     if (!showEmergencyOptions) {
-      setState(() {
-        showEmergencyOptions = true;
-      });
+      setState(() => showEmergencyOptions = true);
       return;
     }
 
@@ -93,80 +100,76 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Container(
-        decoration: const BoxDecoration(color: Color(0xFF07142A)),
+      child: Scaffold(
+        backgroundColor: const Color(0xFF07142A),
 
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
 
-          body: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const HomeHeader(),
+                const SizedBox(height: 20),
 
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                LocationCard(address: address),
+                const SizedBox(height: 20),
 
-                children: [
-                  const HomeHeader(),
-
-                  const SizedBox(height: 20),
-
-                  LocationCard(address: address),
-
-                  const SizedBox(height: 20),
-
-                  // if (latitude != null && longitude != null)
-                  //   SizedBox(
-                  //     height: 220,
-                  //     child: ClipRRect(
-                  //       borderRadius: BorderRadius.circular(16),
-                  //       child: MapScreen(lat: latitude!, lng: longitude!),
-                  //     ),
-                  //   )
-                  // else
-                  //   const Center(child: CircularProgressIndicator()),
-
-                  // const SizedBox(height: 40),
-                  Center(
-                    child: EmergencyButton(
-                      onPressed: onEmergencyPressed,
-                      hasSelection: selectedServices.isNotEmpty,
-                    ),
+                Center(
+                  child: EmergencyButton(
+                    onPressed: onEmergencyPressed,
+                    hasSelection: selectedServices.isNotEmpty,
                   ),
+                ),
 
-                  const SizedBox(height: 30),
+                const SizedBox(height: 30),
 
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 500),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 500),
+                  child: showEmergencyOptions
+                      ? EmergencyOptionsGrid(
+                          selected: selectedServices,
+                          onSelect: toggleService,
+                        )
+                      : const SizedBox(),
+                ),
 
-                    child: showEmergencyOptions
-                        ? EmergencyOptionsGrid(
-                            key: const ValueKey(1),
-                            selected: selectedServices,
-                            onSelect: toggleService,
-                          )
-                        : const SizedBox(),
-                  ),
+                const SizedBox(height: 30),
 
-                  const SizedBox(height: 40),
+                /// 🔥 الكارت
+                BlocBuilder<EmergencyBloc, EmergencyState>(
+                  builder: (context, state) {
+                    if (state is EmergencyLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
 
-                  BlocBuilder<EmergencyBloc, EmergencyState>(
-                    builder: (context, state) {
-                      if (state is EmergencyLoading) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
+                    if (state is EmergencyHasActiveRequest) {
+                      return Column(
+                        children: [
+                          ActiveRequestCard(request: state.request),
+                          const SizedBox(height: 40),
+                        ],
+                      );
+                    }
 
-                      if (state is EmergencyActive) {
-                        return const ActiveRequestCard();
-                      }
+                    /// 🔥 حالة انتهاء الطلب
+                    if (state is EmergencyCompleted) {
+                      return Column(
+                        children: const [
+                          Text(
+                            "تم إنهاء الرحلة ✅",
+                            style: TextStyle(color: Colors.green, fontSize: 16),
+                          ),
+                          SizedBox(height: 40),
+                        ],
+                      );
+                    }
 
-                      return const SizedBox();
-                    },
-                  ),
-
-                  const SizedBox(height: 40),
-                ],
-              ),
+                    return const SizedBox();
+                  },
+                ),
+              ],
             ),
           ),
         ),

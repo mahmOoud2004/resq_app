@@ -21,4 +21,6 @@ class ApiConstants {
   static const String blockUser = "/admin/block-user";
   static const String activeEmergencies = "/admin/active-emergencies";
   static const String cancelEmergency = "/admin/cancel-emergency";
+
+  static const String getActiveRequest = "/emergency/active";
 }

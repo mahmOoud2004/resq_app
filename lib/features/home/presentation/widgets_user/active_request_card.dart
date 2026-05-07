@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:resq_app/features/emergency/data/model/active_request_mode.dart';
+import 'package:resq_app/features/home/presentation/widgets_user/track_driver_screen.dart';
 
 class ActiveRequestCard extends StatelessWidget {
-  const ActiveRequestCard({super.key});
+  final ActiveRequestModel request;
+
+  const ActiveRequestCard({super.key, required this.request});
 
   @override
   Widget build(BuildContext context) {
@@ -20,17 +23,15 @@ class ActiveRequestCard extends StatelessWidget {
               Container(
                 width: 8,
                 height: 8,
-                decoration: const BoxDecoration(
-                  color: Colors.green,
+                decoration: BoxDecoration(
+                  color: _statusColor(request.status),
                   shape: BoxShape.circle,
                 ),
               ),
-
               const SizedBox(width: 8),
-
-              const Text(
-                "Active Request",
-                style: TextStyle(color: Colors.green),
+              Text(
+                request.status.toUpperCase(),
+                style: TextStyle(color: _statusColor(request.status)),
               ),
             ],
           ),
@@ -42,35 +43,31 @@ class ActiveRequestCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: const BoxDecoration(
-                  color: Color(0xFF2E6BFF), // الأزرق
+                  color: Color(0xFF2E6BFF),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.local_taxi,
-                  color: Colors.white,
-                  size: 20,
-                ),
+                child: const Icon(Icons.local_taxi, color: Colors.white),
               ),
 
               const SizedBox(width: 10),
 
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Driver Arriving Soon",
-                      style: TextStyle(
+                      request.driverName ?? "Searching for driver...",
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
 
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
 
                     Text(
-                      "Emergency ride • 3 minutes away",
-                      style: TextStyle(color: Colors.white54),
+                      request.driverPhone ?? "",
+                      style: const TextStyle(color: Colors.white54),
                     ),
                   ],
                 ),
@@ -84,22 +81,36 @@ class ActiveRequestCard extends StatelessWidget {
             width: double.infinity,
             height: 60,
             child: ElevatedButton(
-              onPressed: () {},
-              child: const Text(
-                "Track Driver",
-                style: TextStyle(color: Colors.white),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2E5BFF),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => TrackDriverScreen(
+                      requestId: request.id,
+                      userLat: request.lat,
+                      userLng: request.lng,
+                    ),
+                  ),
+                );
+              },
+              child: const Text("Track Driver"),
             ),
           ),
-          const SizedBox(height: 15),
         ],
       ),
     );
+  }
+
+  Color _statusColor(String status) {
+    switch (status) {
+      case "pending":
+        return Colors.orange;
+      case "accepted":
+        return Colors.blue;
+      case "on_way":
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
   }
 }

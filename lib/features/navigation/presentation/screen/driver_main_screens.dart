@@ -24,8 +24,8 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
 
   final List<Widget> screens = [
     const DriverHomeScreen(),
-    const MapScreen(),
-    const ChatbotPage(),
+    // const MapScreen(),
+    // const ChatbotPage(),
     const ProfileScreen(),
   ];
 
@@ -52,11 +52,11 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
           onTap: onTabTapped,
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-            BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.chat_bubble),
-              label: "Chatbot",
-            ),
+            // BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
+            // BottomNavigationBarItem(
+            //   icon: Icon(Icons.chat_bubble),
+            //   label: "Chatbot",
+            // ),
             BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
           ],
         ),

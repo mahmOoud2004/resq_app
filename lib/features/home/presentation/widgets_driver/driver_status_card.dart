@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:resq_app/features/driver_emergency/presentation/cubit/driver_emergency_cubit.dart';
 
 class DriverStatusCard extends StatefulWidget {
   const DriverStatusCard({super.key});
@@ -20,8 +22,10 @@ class _DriverStatusCardState extends State<DriverStatusCard> {
       ),
       child: Row(
         children: [
+          /// 🔥 Status Icon
           Icon(
-            Icons.person_outline,
+            Icons.circle,
+            size: 12,
             color: isOnline ? Colors.green : Colors.red,
           ),
 
@@ -32,12 +36,11 @@ class _DriverStatusCardState extends State<DriverStatusCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  "Current Status",
+                  "Driver Status",
                   style: TextStyle(color: Colors.grey),
                 ),
-
                 Text(
-                  isOnline ? "You are Online" : "You are Offline",
+                  isOnline ? "Available for requests" : "Offline",
                   style: TextStyle(
                     color: isOnline ? Colors.green : Colors.red,
                     fontWeight: FontWeight.bold,
@@ -47,13 +50,16 @@ class _DriverStatusCardState extends State<DriverStatusCard> {
             ),
           ),
 
+          /// 🔥 Switch
           Switch(
             value: isOnline,
             activeColor: Colors.green,
             onChanged: (value) {
-              setState(() {
-                isOnline = value;
-              });
+              setState(() => isOnline = value);
+
+              if (value) {
+                context.read<DriverEmergencyCubit>().loadRequests();
+              }
             },
           ),
         ],

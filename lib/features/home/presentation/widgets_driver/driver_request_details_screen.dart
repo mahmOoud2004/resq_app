@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'package:resq_app/features/home/presentation/screens/driver_home_screen.dart';
+import 'package:resq_app/features/driver_emergency/data/models/driver_request_model.dart';
+import 'package:resq_app/features/driver_emergency/presentation/cubit/driver_emergency_cubit.dart';
 import 'package:resq_app/features/home/presentation/widgets_driver/navigation_page.dart';
 
-import 'package:resq_app/features/driver_emergency/presentation/cubit/driver_emergency_cubit.dart';
-
 class DriverRequestDetailsScreen extends StatelessWidget {
-  final int requestId;
+  final DriverRequestModel request;
 
-  const DriverRequestDetailsScreen({super.key, required this.requestId});
+  const DriverRequestDetailsScreen({super.key, required this.request});
 
   @override
   Widget build(BuildContext context) {
@@ -19,62 +17,41 @@ class DriverRequestDetailsScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFF081A33),
         elevation: 0,
-
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-
-        title: const Text(
-          "New Emergency Request",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-
         centerTitle: true,
+        title: const Text(
+          "Emergency Request",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
 
       body: Padding(
         padding: const EdgeInsets.all(16),
-
         child: Column(
           children: [
-            /// Emergency Location
+            /// 🔥 HEADER
             Container(
               padding: const EdgeInsets.all(16),
-
               decoration: BoxDecoration(
                 color: const Color(0xFF0F2747),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(20),
               ),
-
               child: Row(
                 children: const [
                   CircleAvatar(
+                    radius: 25,
                     backgroundColor: Colors.red,
-                    child: Icon(Icons.location_on, color: Colors.white),
+                    child: Icon(Icons.warning, color: Colors.white),
                   ),
-
                   SizedBox(width: 12),
-
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Emergency Location",
-                        style: TextStyle(color: Colors.white, fontSize: 16),
+                  Expanded(
+                    child: Text(
+                      "New Emergency Request",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
-
-                      SizedBox(height: 4),
-
-                      Text(
-                        "User Location",
-                        style: TextStyle(color: Colors.white70),
-                      ),
-                    ],
+                    ),
                   ),
                 ],
               ),
@@ -82,71 +59,58 @@ class DriverRequestDetailsScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            /// Request Details
-            Container(
-              padding: const EdgeInsets.all(16),
-
-              decoration: BoxDecoration(
-                color: const Color(0xFF0F2747),
-                borderRadius: BorderRadius.circular(16),
-              ),
-
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            /// 📍 LOCATION CARD
+            _buildCard(
+              child: Row(
                 children: [
-                  Text(
-                    "Emergency Request",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
+                  const Icon(Icons.location_on, color: Colors.red),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      "${request.latitude}, ${request.longitude}",
+                      style: const TextStyle(color: Colors.white),
                     ),
-                  ),
-
-                  SizedBox(height: 8),
-
-                  Text(
-                    "A user has requested emergency assistance.",
-                    style: TextStyle(color: Colors.white70),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 30),
+            const SizedBox(height: 15),
 
-            /// Buttons
+            /// 👤 USER INFO CARD
+            _buildCard(
+              child: Column(
+                children: [
+                  _infoRow(Icons.person, "User", request.userName ?? "Unknown"),
+                  const SizedBox(height: 12),
+                  _infoRow(Icons.phone, "Phone", request.userPhone ?? "-"),
+                  const SizedBox(height: 12),
+                  _infoRow(Icons.build, "Service", request.serviceType),
+                ],
+              ),
+            ),
+
+            const Spacer(),
+
+            /// 🔥 BUTTONS
             Row(
               children: [
-                /// Reject
+                /// ❌ Reject
                 Expanded(
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey.shade800,
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      side: const BorderSide(color: Colors.white30),
-
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
                     ),
-
                     onPressed: () async {
                       await context.read<DriverEmergencyCubit>().cancel(
-                        requestId,
+                        request.id,
                       );
-
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => BlocProvider.value(
-                            value: context.read<DriverEmergencyCubit>(),
-                            child: const DriverHomeScreen(),
-                          ),
-                        ),
-                        (route) => false,
-                      );
+                      Navigator.pop(context);
                     },
-
                     child: const Text(
                       "Reject",
                       style: TextStyle(color: Colors.white),
@@ -156,37 +120,34 @@ class DriverRequestDetailsScreen extends StatelessWidget {
 
                 const SizedBox(width: 12),
 
-                /// Accept
+                /// ✅ Accept
                 Expanded(
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
-
                       padding: const EdgeInsets.symmetric(vertical: 16),
-
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
                     ),
-
                     onPressed: () async {
-                      final cubit = context.read<DriverEmergencyCubit>();
-
-                      await cubit.accept(requestId);
+                      await context.read<DriverEmergencyCubit>().accept(
+                        request.id,
+                      );
 
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (_) => BlocProvider.value(
-                            value: context.read<DriverEmergencyCubit>(),
-                            child: NavigationPage(requestId: requestId),
+                            value: context
+                                .read<DriverEmergencyCubit>(), // 🔥 نفس الكيوبت
+                            child: NavigationPage(request: request),
                           ),
                         ),
                       );
                     },
-
                     child: const Text(
-                      "Accept Request",
+                      "Accept",
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
@@ -196,6 +157,42 @@ class DriverRequestDetailsScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  /// 🔥 reusable card
+  Widget _buildCard({required Widget child}) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0F2747),
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10),
+        ],
+      ),
+      child: child,
+    );
+  }
+
+  /// 🔥 row with icon
+  Widget _infoRow(IconData icon, String title, String value) {
+    return Row(
+      children: [
+        Icon(icon, color: Colors.white70, size: 20),
+        const SizedBox(width: 10),
+        Text("$title:", style: const TextStyle(color: Colors.white54)),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

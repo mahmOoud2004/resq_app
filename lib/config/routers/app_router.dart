@@ -7,6 +7,7 @@ import 'package:resq_app/features/auth/presentation/screens/login.dart';
 import 'package:resq_app/features/auth/presentation/screens/otp_screen.dart';
 import 'package:resq_app/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:resq_app/features/auth/presentation/screens/signup.dart';
+import 'package:resq_app/features/driver_emergency/data/models/driver_request_model.dart';
 import 'package:resq_app/features/driver_emergency/presentation/cubit/driver_emergency_cubit.dart';
 import 'package:resq_app/features/emergency/domain/usecase/create_emergency_usecase.dart';
 import 'package:resq_app/features/home/presentation/screens/driver_home_screen.dart';
@@ -147,11 +148,13 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/driverRequestDetails',
       builder: (context, state) {
-        final id = state.extra as int;
+        final request = state.extra as DriverRequestModel;
 
         return BlocProvider.value(
           value: context.read<DriverEmergencyCubit>(),
-          child: DriverRequestDetailsScreen(requestId: id),
+          child: DriverRequestDetailsScreen(
+            request: request, // 🔥 بدل requestId
+          ),
         );
       },
     ),
@@ -161,7 +164,19 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: "/driver-main",
-      builder: (context, state) => const DriverMainScreen(),
+      builder: (context, state) {
+        return MultiBlocProvider(
+          providers: [
+            /// ✅ Emergency Bloc
+            BlocProvider(
+              create: (context) => EmergencyBloc(
+                CreateEmergencyUseCase(EmergencyRepositoryImpl()),
+              ),
+            ),
+          ],
+          child: const DriverMainScreen(),
+        );
+      },
     ),
 
     // ADMIN HOME

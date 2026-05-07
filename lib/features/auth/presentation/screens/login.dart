@@ -11,6 +11,7 @@ import 'package:resq_app/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:resq_app/features/auth/presentation/cubit/auth_state.dart';
 import 'package:resq_app/features/auth/presentation/widgets/build_puttom.dart';
 import 'package:resq_app/features/auth/presentation/widgets/build_text_field.dart';
+import 'package:resq_app/features/auth/presentation/widgets/firsraid_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   LoginScreen({super.key});
@@ -21,9 +22,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final idController = TextEditingController();
-
   final passwordController = TextEditingController();
-
   final phoneController = TextEditingController();
 
   String? validateInputs() {
@@ -50,6 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     phoneController.dispose();
     passwordController.dispose();
+    idController.dispose();
     super.dispose();
   }
 
@@ -63,6 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
           if (state is AuthSuccess) {
             context.go("/auth-gate");
           }
+
           if (state is AuthNeedsOtp) {
             context.go(Routes.otp, extra: state.email);
           }
@@ -75,6 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
         },
         builder: (context, state) {
           return Scaffold(
+            backgroundColor: const Color(0xff001233),
             resizeToAvoidBottomInset: true,
             body: SafeArea(
               child: SingleChildScrollView(
@@ -88,16 +90,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     bottom: MediaQuery.of(context).viewInsets.bottom + 24,
                   ),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const SizedBox(height: 40),
 
                       const Text(
                         "ResQ",
                         style: TextStyle(
-                          fontSize: 34,
+                          fontSize: 40,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                          color: Colors.red,
                         ),
                       ),
 
@@ -105,22 +106,26 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       const Text(
                         "Welcome!\nLogin",
-                        style: TextStyle(fontSize: 16, color: Colors.white),
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.white,
+                          height: 1.5,
+                        ),
                         textAlign: TextAlign.center,
                       ),
 
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 40),
 
                       AppTextField(hint: "ID Number", controller: idController),
 
-                      const SizedBox(height: 15),
+                      const SizedBox(height: 20),
 
                       AppTextField(
                         hint: "phone number",
                         controller: phoneController,
                       ),
 
-                      const SizedBox(height: 15),
+                      const SizedBox(height: 20),
 
                       AppTextField(
                         hint: "password",
@@ -136,7 +141,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                           child: const Text(
                             "Forgot password?",
-                            style: TextStyle(color: AppColors.primary),
+                            style: TextStyle(color: Colors.red, fontSize: 16),
                           ),
                         ),
                       ),
@@ -165,17 +170,20 @@ class _LoginScreenState extends State<LoginScreen> {
                               },
                             ),
 
-                      const SizedBox(height: 15),
+                      const SizedBox(height: 25),
 
                       Text.rich(
                         TextSpan(
                           text: "Don't have an account? ",
-                          style: const TextStyle(color: Colors.white),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
                           children: [
                             TextSpan(
                               text: "create one",
                               style: const TextStyle(
-                                color: AppColors.primary,
+                                color: Colors.red,
                                 fontWeight: FontWeight.bold,
                               ),
                               recognizer: TapGestureRecognizer()
@@ -185,6 +193,128 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ],
                         ),
+                      ),
+
+                      const SizedBox(height: 40),
+
+                      /// ====== BUTTONS ======
+                      Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        const EmergencyNumbersScreen(),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 20,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.08),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: Colors.white12),
+                                ),
+                                child: Column(
+                                  children: const [
+                                    CircleAvatar(
+                                      radius: 28,
+                                      backgroundColor: Color(0xff2A1A1A),
+                                      child: Icon(
+                                        Icons.phone,
+                                        color: Colors.red,
+                                        size: 28,
+                                      ),
+                                    ),
+
+                                    SizedBox(height: 15),
+
+                                    Text(
+                                      "Emergency",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+
+                                    SizedBox(height: 5),
+
+                                    Text(
+                                      "Numbers",
+                                      style: TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(width: 15),
+
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const FirstAidScreen(),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 20,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.08),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: Colors.white12),
+                                ),
+                                child: Column(
+                                  children: const [
+                                    CircleAvatar(
+                                      radius: 28,
+                                      backgroundColor: Color(0xff2A1A1A),
+                                      child: Icon(
+                                        Icons.medical_services,
+                                        color: Colors.red,
+                                        size: 28,
+                                      ),
+                                    ),
+
+                                    SizedBox(height: 15),
+
+                                    Text(
+                                      "First Aid",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+
+                                    SizedBox(height: 5),
+
+                                    Text(
+                                      "Instructions",
+                                      style: TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

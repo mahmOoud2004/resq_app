@@ -13,3 +13,5 @@ class SendEmergencyEvent extends EmergencyEvent {
     required this.lng,
   });
 }
+
+class GetActiveRequestEvent extends EmergencyEvent {}

@@ -6,10 +6,10 @@ class EmergencyInitial extends EmergencyState {}
 
 class EmergencyLoading extends EmergencyState {}
 
-class EmergencyActive extends EmergencyState {
-  final String serviceType;
+class EmergencyHasActiveRequest extends EmergencyState {
+  final ActiveRequestModel request;
 
-  EmergencyActive(this.serviceType);
+  EmergencyHasActiveRequest(this.request);
 }
 
 class EmergencyError extends EmergencyState {
@@ -17,3 +17,5 @@ class EmergencyError extends EmergencyState {
 
   EmergencyError(this.message);
 }
+
+class EmergencyCompleted extends EmergencyState {}

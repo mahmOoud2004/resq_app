@@ -49,7 +49,7 @@ class NearbyRequestsSection extends StatelessWidget {
                       final request = state.requests[index];
 
                       return RequestCard(
-                        requestId: request.id,
+                        request: request, // 🔥 object كامل
                         title: request.serviceType,
                         distance: "${request.latitude}, ${request.longitude}",
                         location: "Emergency Location",
