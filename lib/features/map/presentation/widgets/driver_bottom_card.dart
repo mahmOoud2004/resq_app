@@ -1,24 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:resq_app/core/theme/theme_ext.dart';
+import 'package:resq_app/core/constants/app_color.dart';
 
 class DriverBottomCard extends StatelessWidget {
   final String? name;
   final String? phone;
+  final String? eta;
 
-  const DriverBottomCard({this.name, this.phone});
+  const DriverBottomCard({super.key, this.name, this.phone, this.eta});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: const BoxDecoration(
-        color: Color(0xFF0F2347),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: context.surfaceColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        border: Border(top: BorderSide(color: context.borderColor)),
       ),
       child: Row(
         children: [
           const CircleAvatar(
             radius: 25,
-            backgroundColor: Color(0xFF2E5BFF),
+            backgroundColor: AppColors.accent,
             child: Icon(Icons.person, color: Colors.white),
           ),
 
@@ -40,6 +44,39 @@ class DriverBottomCard extends StatelessWidget {
                   phone ?? "",
                   style: const TextStyle(color: Colors.white54),
                 ),
+                if (eta != null) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppColors.primary),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.timer,
+                          color: AppColors.primary,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          eta!,
+                          style: const TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

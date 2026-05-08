@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:resq_app/core/theme/theme_ext.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:resq_app/core/constants/app_color.dart';
 
 import '../bloc/admin_bloc.dart';
 import '../bloc/admin_event.dart';
@@ -24,7 +26,7 @@ class _AdminRequestsView extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF07142A),
+      backgroundColor: context.backgroundColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -46,11 +48,11 @@ class _AdminRequestsView extends StatelessWidget {
 
                 const SizedBox(height: 20),
 
-                _infoTile("Full Name", user.name),
-                _infoTile("Email", user.email),
-                _infoTile("Phone", user.phone),
-                _infoTile("Role", user.role),
-                _infoTile("ID Number", user.idNumber),
+                _infoTile("Full Name", user.name, context),
+                _infoTile("Email", user.email, context),
+                _infoTile("Phone", user.phone, context),
+                _infoTile("Role", user.role, context),
+                _infoTile("ID Number", user.idNumber, context),
 
                 const SizedBox(height: 20),
 
@@ -77,13 +79,14 @@ class _AdminRequestsView extends StatelessWidget {
     );
   }
 
-  Widget _infoTile(String title, String? value) {
+  Widget _infoTile(String title, String? value, dynamic context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F1F3D),
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.borderColor),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -104,10 +107,10 @@ class _AdminRequestsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF07142A),
+      backgroundColor: context.backgroundColor,
 
       appBar: AppBar(
-        backgroundColor: const Color(0xFF07142A),
+        backgroundColor: context.backgroundColor,
         title: const Text("Pending Requests"),
       ),
 
@@ -141,8 +144,9 @@ class _AdminRequestsView extends StatelessWidget {
                     padding: const EdgeInsets.all(16),
 
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0F1F3D),
+                      color: context.surfaceColor,
                       borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: context.borderColor),
                     ),
 
                     child: Column(
@@ -205,7 +209,7 @@ class _AdminRequestsView extends StatelessWidget {
                             Expanded(
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red,
+                                  backgroundColor: AppColors.primary,
                                 ),
                                 onPressed: () async {
                                   context.read<AdminBloc>().add(

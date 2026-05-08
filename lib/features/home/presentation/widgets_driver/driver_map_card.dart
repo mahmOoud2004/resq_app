@@ -1,8 +1,10 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+import 'package:resq_app/core/constants/app_color.dart';
 
 class DriverMapCard extends StatefulWidget {
   const DriverMapCard({super.key});
@@ -13,9 +15,12 @@ class DriverMapCard extends StatefulWidget {
 
 class _DriverMapCardState extends State<DriverMapCard> {
   LatLng? driverLocation;
-  final MapController _mapController = MapController();
+
+  GoogleMapController? mapController;
 
   Timer? timer;
+
+  Set<Marker> markers = {};
 
   @override
   void initState() {
@@ -24,14 +29,16 @@ class _DriverMapCardState extends State<DriverMapCard> {
     _getDriverLocation();
 
     /// 🔥 تحديث كل 5 ثواني
-    timer = Timer.periodic(const Duration(seconds: 5), (_) {
-      _getDriverLocation();
-    });
+    timer = Timer.periodic(
+      const Duration(seconds: 5),
+      (_) => _getDriverLocation(),
+    );
   }
 
   @override
   void dispose() {
     timer?.cancel();
+    mapController?.dispose();
     super.dispose();
   }
 
@@ -47,9 +54,19 @@ class _DriverMapCardState extends State<DriverMapCard> {
 
       setState(() {
         driverLocation = newLocation;
+
+        markers = {
+          Marker(
+            markerId: const MarkerId("driver"),
+            position: newLocation,
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              BitmapDescriptor.hueRed,
+            ),
+          ),
+        };
       });
 
-      _mapController.move(newLocation, 15);
+      mapController?.animateCamera(CameraUpdate.newLatLng(newLocation));
     } catch (e) {
       debugPrint("LOCATION ERROR: $e");
     }
@@ -60,49 +77,44 @@ class _DriverMapCardState extends State<DriverMapCard> {
     if (driverLocation == null) {
       return Container(
         height: 200,
+
         decoration: BoxDecoration(
-          color: Colors.black12,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.border),
         ),
+
         child: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Container(
       height: 200,
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
-      clipBehavior: Clip.hardEdge,
-      child: FlutterMap(
-        mapController: _mapController,
-        options: MapOptions(initialCenter: driverLocation!, initialZoom: 15),
-        children: [
-          TileLayer(
-            urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-            userAgentPackageName: 'com.resq.app',
-          ),
 
-          MarkerLayer(
-            markers: [
-              Marker(
-                point: driverLocation!,
-                width: 60,
-                height: 60,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 3),
-                  ),
-                  child: const Icon(
-                    Icons.local_taxi,
-                    color: Colors.white,
-                    size: 30,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+
+      clipBehavior: Clip.hardEdge,
+
+      child: GoogleMap(
+        initialCameraPosition: CameraPosition(
+          target: driverLocation!,
+          zoom: 15,
+        ),
+
+        onMapCreated: (controller) {
+          mapController = controller;
+        },
+
+        markers: markers,
+
+        zoomControlsEnabled: false,
+
+        myLocationEnabled: true,
+
+        myLocationButtonEnabled: false,
       ),
     );
   }

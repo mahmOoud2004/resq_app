@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:resq_app/core/constants/app_color.dart';
 
 class EmergencyButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -23,14 +24,14 @@ class EmergencyButton extends StatelessWidget {
           shape: BoxShape.circle,
 
           gradient: const LinearGradient(
-            colors: [Color(0xFFFF4B4B), Color(0xFFFF1F1F)],
+            colors: [AppColors.primaryLight, AppColors.primaryDark],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
 
           boxShadow: [
             BoxShadow(
-              color: Colors.red.withOpacity(.5),
+              color: AppColors.primary.withValues(alpha: .45),
               blurRadius: 40,
               spreadRadius: 5,
             ),

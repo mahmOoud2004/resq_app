@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:resq_app/features/driver_emergency/data/models/driver_request_model.dart';
 import 'package:resq_app/features/driver_emergency/presentation/cubit/driver_emergency_cubit.dart';
@@ -95,20 +96,51 @@ class NavigationPage extends StatelessWidget {
                 color: Color(0xFF081A33),
                 borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
               ),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF3B6EF6),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                onPressed: () async {
-                  await cubit.complete(request.id);
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (_) => const DriverMainScreen()),
-                    (route) => false,
-                  );
-                },
-                child: const Text("Arrived"),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      onPressed: () async {
+                        final url = Uri.parse("google.navigation:q=${request.latitude},${request.longitude}");
+                        if (await canLaunchUrl(url)) {
+                          await launchUrl(url);
+                        } else {
+                          final webUrl = Uri.parse("https://www.google.com/maps/dir/?api=1&destination=${request.latitude},${request.longitude}");
+                          await launchUrl(webUrl);
+                        }
+                      },
+                      icon: const Icon(Icons.map, color: Colors.white),
+                      label: const Text("Open Google Maps", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF3B6EF6),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      onPressed: () async {
+                        await cubit.complete(request.id);
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (_) => const DriverMainScreen()),
+                          (route) => false,
+                        );
+                      },
+                      child: const Text("Arrived", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

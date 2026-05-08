@@ -1,3 +1,4 @@
+import 'package:resq_app/core/theme/theme_ext.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -40,16 +41,30 @@ class _IdUploadFieldState extends State<IdUploadField> {
     return GestureDetector(
       onTap: pickImage,
       child: Container(
-        height: 80,
+        height: 96,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: AppColors.fieldColor,
-          borderRadius: BorderRadius.circular(10),
+          color: context.fieldColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.16)),
         ),
         child: selectedImage == null
-            ? const Center(child: Text("Upload your personal ID"))
+            ? Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.upload_file, color: context.textMutedColor),
+                  const SizedBox(width: 10),
+                  const Text(
+                    "Upload your personal ID",
+                    style: TextStyle(
+                      color: AppColors.fieldText,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              )
             : ClipRRect(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(16),
                 child: Image.file(
                   selectedImage!,
                   fit: BoxFit.cover,

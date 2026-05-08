@@ -1,3 +1,4 @@
+import 'package:resq_app/core/theme/theme_ext.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,7 +15,7 @@ import 'package:resq_app/features/auth/presentation/widgets/build_text_field.dar
 import 'package:resq_app/features/auth/presentation/widgets/firsraid_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  LoginScreen({super.key});
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -76,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
         },
         builder: (context, state) {
           return Scaffold(
-            backgroundColor: const Color(0xff001233),
+            backgroundColor: context.backgroundColorDeep,
             resizeToAvoidBottomInset: true,
             body: SafeArea(
               child: SingleChildScrollView(
@@ -98,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: TextStyle(
                           fontSize: 40,
                           fontWeight: FontWeight.bold,
-                          color: Colors.red,
+                          color: AppColors.primary,
                         ),
                       ),
 
@@ -141,7 +142,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                           child: const Text(
                             "Forgot password?",
-                            style: TextStyle(color: Colors.red, fontSize: 16),
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 16,
+                            ),
                           ),
                         ),
                       ),
@@ -183,7 +187,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             TextSpan(
                               text: "create one",
                               style: const TextStyle(
-                                color: Colors.red,
+                                color: AppColors.primary,
                                 fontWeight: FontWeight.bold,
                               ),
                               recognizer: TapGestureRecognizer()
@@ -216,9 +220,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                   vertical: 20,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.08),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(color: Colors.white12),
+                                  color: context.surfaceLightColor.withValues(
+                                    alpha: 0.74,
+                                  ),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(color: context.borderColor),
                                 ),
                                 child: Column(
                                   children: const [
@@ -227,7 +233,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       backgroundColor: Color(0xff2A1A1A),
                                       child: Icon(
                                         Icons.phone,
-                                        color: Colors.red,
+                                        color: AppColors.primary,
                                         size: 28,
                                       ),
                                     ),
@@ -274,9 +280,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                   vertical: 20,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.08),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(color: Colors.white12),
+                                  color: context.surfaceLightColor.withValues(
+                                    alpha: 0.74,
+                                  ),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(color: context.borderColor),
                                 ),
                                 child: Column(
                                   children: const [
@@ -285,7 +293,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       backgroundColor: Color(0xff2A1A1A),
                                       child: Icon(
                                         Icons.medical_services,
-                                        color: Colors.red,
+                                        color: AppColors.primary,
                                         size: 28,
                                       ),
                                     ),

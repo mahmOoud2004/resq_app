@@ -1,7 +1,10 @@
+import 'package:resq_app/core/theme/theme_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:resq_app/config/routers/route_names.dart';
+import 'package:resq_app/core/constants/app_color.dart';
+
 import '../bloc/profile_bloc.dart';
 import '../bloc/profile_state.dart';
 
@@ -22,11 +25,11 @@ class _AccountBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF07142A),
+      backgroundColor: context.backgroundColor,
 
       appBar: AppBar(
         title: const Text("Account", style: TextStyle(color: Colors.white)),
-        backgroundColor: const Color(0xFF07142A),
+        backgroundColor: context.backgroundColor,
         elevation: 0,
       ),
 
@@ -44,6 +47,7 @@ class _AccountBody extends StatelessWidget {
 
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+
                 children: [
                   const SizedBox(height: 20),
 
@@ -53,7 +57,7 @@ class _AccountBody extends StatelessWidget {
                       children: [
                         CircleAvatar(
                           radius: 45,
-                          backgroundColor: const Color(0xFF2563EB),
+                          backgroundColor: AppColors.primary,
 
                           child: CircleAvatar(
                             radius: 40,
@@ -71,6 +75,7 @@ class _AccountBody extends StatelessWidget {
 
                         Text(
                           "${user.firstName} ${user.lastName}",
+
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 20,
@@ -82,8 +87,9 @@ class _AccountBody extends StatelessWidget {
 
                         Text(
                           user.email,
-                          style: const TextStyle(
-                            color: Colors.white54,
+
+                          style: TextStyle(
+                            color: context.textSecondaryColor,
                             fontSize: 14,
                           ),
                         ),
@@ -98,25 +104,32 @@ class _AccountBody extends StatelessWidget {
                     padding: const EdgeInsets.all(18),
 
                     decoration: BoxDecoration(
-                      color: const Color(0xFF13294B),
+                      color: context.surfaceLightColor,
+
                       borderRadius: BorderRadius.circular(18),
+
+                      border: Border.all(color: context.borderColor),
                     ),
 
                     child: Column(
                       children: [
-                        _infoRow("First Name", user.firstName),
+                        _infoRow(context, "First Name", user.firstName),
+
                         const Divider(color: Colors.white12),
 
-                        _infoRow("Last Name", user.lastName),
+                        _infoRow(context, "Last Name", user.lastName),
+
                         const Divider(color: Colors.white12),
 
-                        _infoRow("Phone", user.phone),
+                        _infoRow(context, "Phone", user.phone),
+
                         const Divider(color: Colors.white12),
 
-                        _infoRow("Email", user.email),
+                        _infoRow(context, "Email", user.email),
+
                         const Divider(color: Colors.white12),
 
-                        _infoRow("National ID", user.nationalId),
+                        _infoRow(context, "National ID", user.nationalId),
                       ],
                     ),
                   ),
@@ -126,6 +139,7 @@ class _AccountBody extends StatelessWidget {
                   /// ID Card Section
                   const Text(
                     "ID Card",
+
                     style: TextStyle(color: Colors.white70, fontSize: 15),
                   ),
 
@@ -136,8 +150,11 @@ class _AccountBody extends StatelessWidget {
                     width: double.infinity,
 
                     decoration: BoxDecoration(
-                      color: const Color(0xFF13294B),
+                      color: context.surfaceLightColor,
+
                       borderRadius: BorderRadius.circular(18),
+
+                      border: Border.all(color: context.borderColor),
                     ),
 
                     child:
@@ -171,7 +188,7 @@ class _AccountBody extends StatelessWidget {
                       },
 
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2563EB),
+                        backgroundColor: AppColors.primary,
 
                         padding: const EdgeInsets.symmetric(vertical: 16),
 
@@ -182,6 +199,7 @@ class _AccountBody extends StatelessWidget {
 
                       child: const Text(
                         "Edit Profile",
+
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -200,6 +218,7 @@ class _AccountBody extends StatelessWidget {
             return Center(
               child: Text(
                 state.message,
+
                 style: const TextStyle(color: Colors.white),
               ),
             );
@@ -211,7 +230,7 @@ class _AccountBody extends StatelessWidget {
     );
   }
 
-  Widget _infoRow(String title, String value) {
+  Widget _infoRow(BuildContext context, String title, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
 
@@ -219,7 +238,7 @@ class _AccountBody extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
         children: [
-          Text(title, style: const TextStyle(color: Colors.white54)),
+          Text(title, style: TextStyle(color: context.textSecondaryColor)),
 
           Flexible(
             child: Text(

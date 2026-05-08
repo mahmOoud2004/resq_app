@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:resq_app/core/theme/theme_ext.dart';
+import 'package:resq_app/core/constants/app_color.dart';
 
 class HomeHeader extends StatelessWidget {
   const HomeHeader({super.key});
@@ -9,14 +11,21 @@ class HomeHeader extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Row(
-          children: const [
-            Icon(Icons.local_hospital, color: Colors.red),
-            SizedBox(width: 8),
-            Text(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.local_hospital, color: AppColors.primary),
+            ),
+            const SizedBox(width: 10),
+            const Text(
               "ResQ",
               style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
                 color: Colors.white,
               ),
             ),
@@ -25,6 +34,10 @@ class HomeHeader extends StatelessWidget {
 
         IconButton(
           onPressed: () {},
+          style: IconButton.styleFrom(
+            backgroundColor: context.surfaceLightColor,
+            foregroundColor: Colors.white,
+          ),
           icon: const Icon(Icons.notifications_none),
         ),
       ],

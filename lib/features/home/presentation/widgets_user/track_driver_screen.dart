@@ -1,10 +1,11 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:latlong2/latlong.dart' show Distance, LengthUnit;
-import 'package:resq_app/core/network/dio_client.dart';
+
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+import 'package:resq_app/core/network/dio_client.dart';
 
 class TrackDriverScreen extends StatefulWidget {
   final int requestId;
@@ -25,14 +26,20 @@ class TrackDriverScreen extends StatefulWidget {
 class _TrackDriverScreenState extends State<TrackDriverScreen> {
   final dio = DioClient().dio;
 
+  GoogleMapController? mapController;
+
   LatLng? driverLocation;
+  LatLng? lastRouteDriverLocation;
+
   late LatLng userLocation;
 
-  List<LatLng> routePoints = [];
+  Set<Marker> markers = {};
+  Set<Polyline> polylines = {};
+
   int etaMinutes = 0;
   bool driverArrived = false;
 
-  String status = "pending"; // 🔥 الحالة
+  String status = "pending";
 
   Timer? timer;
 
@@ -44,18 +51,17 @@ class _TrackDriverScreenState extends State<TrackDriverScreen> {
 
     _getTracking();
 
-    timer = Timer.periodic(const Duration(seconds: 3), (_) {
-      _getTracking();
-    });
+    /// 🔥 كل 10 ثواني بدل 3
+    timer = Timer.periodic(const Duration(seconds: 10), (_) => _getTracking());
   }
 
   @override
   void dispose() {
     timer?.cancel();
+    mapController?.dispose();
     super.dispose();
   }
 
-  /// 🔥 جلب الداتا
   Future<void> _getTracking() async {
     try {
       final response = await dio.get(
@@ -66,7 +72,7 @@ class _TrackDriverScreenState extends State<TrackDriverScreen> {
 
       status = data["request_status"] ?? "pending";
 
-      /// ✅ لو خلص
+      /// ✅ الرحلة انتهت
       if (status == "completed") {
         if (!mounted) return;
 
@@ -75,21 +81,35 @@ class _TrackDriverScreenState extends State<TrackDriverScreen> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text("Trip Completed ✅")));
+
         return;
       }
 
-      /// 🚫 لو لسه accepted → مفيش سواق
+      /// 🚑 السواق قبل الطلب لكن لسه متحركش
       if (status == "accepted") {
         setState(() {
           driverLocation = null;
-          routePoints = [];
+
+          polylines.clear();
+
+          markers = {
+            Marker(
+              markerId: const MarkerId("user"),
+              position: userLocation,
+              icon: BitmapDescriptor.defaultMarkerWithHue(
+                BitmapDescriptor.hueBlue,
+              ),
+            ),
+          };
+
           etaMinutes = 0;
         });
+
         return;
       }
 
-      /// ✅ on_way → نعرض السواق
       final driver = data["driver_location"];
+
       if (driver == null) return;
 
       double driverLat = double.parse(driver["lat"]);
@@ -106,47 +126,72 @@ class _TrackDriverScreenState extends State<TrackDriverScreen> {
 
       if (!mounted) return;
 
-      setState(() {
-        driverLocation = newDriverLocation;
-      });
+      driverLocation = newDriverLocation;
 
-      /// 🔥 حساب المسافة
-      double distance = const Distance().as(
-        LengthUnit.Meter,
-        driverLocation!,
-        userLocation,
-      );
+      _updateMarkers();
 
-      if (distance < 10) {
-        setState(() {
-          driverArrived = true;
-          routePoints = [];
-          etaMinutes = 0;
-        });
-        return;
-      } else {
-        driverArrived = false;
-      }
-
-      /// 🔥 نجيب الطريق بس لما يبقى on_way
+      /// 🔥 طلب route فقط عند الحركة الكبيرة
       if (status == "on_way") {
-        _getRouteAndEta();
+        bool shouldRequestRoute = false;
+
+        if (lastRouteDriverLocation == null) {
+          shouldRequestRoute = true;
+        } else {
+          double movedDistance = Geolocator.distanceBetween(
+            lastRouteDriverLocation!.latitude,
+            lastRouteDriverLocation!.longitude,
+            driverLocation!.latitude,
+            driverLocation!.longitude,
+          );
+
+          /// 🔥 لو اتحرك أكتر من 100 متر
+          if (movedDistance > 100) {
+            shouldRequestRoute = true;
+          }
+        }
+
+        if (shouldRequestRoute) {
+          lastRouteDriverLocation = driverLocation;
+
+          _getRouteAndEta();
+        }
       }
     } catch (e) {
       debugPrint("TRACK ERROR: $e");
     }
   }
 
-  /// 🔥 جلب الطريق
+  void _updateMarkers() {
+    markers = {
+      Marker(
+        markerId: const MarkerId("user"),
+        position: userLocation,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+      ),
+
+      if (driverLocation != null)
+        Marker(
+          markerId: const MarkerId("driver"),
+          position: driverLocation!,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        ),
+    };
+
+    setState(() {});
+  }
+
   Future<void> _getRouteAndEta() async {
     if (driverLocation == null) return;
 
     try {
       final response = await Dio().get(
         "https://api.openrouteservice.org/v2/directions/driving-car",
+
         options: Options(headers: {"Authorization": "YOUR_API_KEY"}),
+
         queryParameters: {
           "start": "${driverLocation!.longitude},${driverLocation!.latitude}",
+
           "end": "${userLocation.longitude},${userLocation.latitude}",
         },
       );
@@ -156,89 +201,114 @@ class _TrackDriverScreenState extends State<TrackDriverScreen> {
       final duration =
           response.data["features"][0]["properties"]["summary"]["duration"];
 
-      final points = coords.map<LatLng>((e) => LatLng(e[1], e[0])).toList();
+      List<LatLng> points = coords.map<LatLng>((e) {
+        return LatLng(e[1], e[0]);
+      }).toList();
 
-      if (!mounted) return;
+      /// 🔥 حساب الوصول
+      double distance = Geolocator.distanceBetween(
+        driverLocation!.latitude,
+        driverLocation!.longitude,
+        userLocation.latitude,
+        userLocation.longitude,
+      );
+
+      if (distance < 15) {
+        driverArrived = true;
+      } else {
+        driverArrived = false;
+      }
 
       setState(() {
-        routePoints = points;
+        polylines = {
+          Polyline(
+            polylineId: const PolylineId("route"),
+            points: points,
+            width: 5,
+            color: Colors.blue,
+          ),
+        };
+
         etaMinutes = (duration / 60).round();
       });
+
+      _moveCamera();
     } catch (e) {
       debugPrint("ROUTE ERROR: $e");
     }
+  }
+
+  void _moveCamera() {
+    if (driverLocation == null || mapController == null) return;
+
+    LatLngBounds bounds = LatLngBounds(
+      southwest: LatLng(
+        driverLocation!.latitude < userLocation.latitude
+            ? driverLocation!.latitude
+            : userLocation.latitude,
+
+        driverLocation!.longitude < userLocation.longitude
+            ? driverLocation!.longitude
+            : userLocation.longitude,
+      ),
+
+      northeast: LatLng(
+        driverLocation!.latitude > userLocation.latitude
+            ? driverLocation!.latitude
+            : userLocation.latitude,
+
+        driverLocation!.longitude > userLocation.longitude
+            ? driverLocation!.longitude
+            : userLocation.longitude,
+      ),
+    );
+
+    mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 80));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF07142A),
+
       appBar: AppBar(title: const Text("Track Driver")),
 
       body: Stack(
         children: [
-          FlutterMap(
-            options: MapOptions(initialCenter: userLocation, initialZoom: 15),
-            children: [
-              TileLayer(
-                urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                userAgentPackageName: 'com.resq.app',
-              ),
+          GoogleMap(
+            initialCameraPosition: CameraPosition(
+              target: userLocation,
+              zoom: 15,
+            ),
 
-              /// 🔥 الطريق يظهر بس on_way
-              if (routePoints.isNotEmpty && status == "on_way")
-                PolylineLayer(
-                  polylines: [
-                    Polyline(
-                      points: routePoints,
-                      strokeWidth: 4,
-                      color: Colors.blue,
-                    ),
-                  ],
-                ),
+            onMapCreated: (controller) {
+              mapController = controller;
+            },
 
-              MarkerLayer(
-                markers: [
-                  /// 📍 user دايماً
-                  Marker(
-                    point: userLocation,
-                    width: 50,
-                    height: 50,
-                    child: const Icon(
-                      Icons.person_pin_circle,
-                      color: Colors.blue,
-                      size: 40,
-                    ),
-                  ),
+            markers: markers,
 
-                  /// 🚑 driver يظهر بس on_way
-                  if (driverLocation != null && status == "on_way")
-                    Marker(
-                      point: driverLocation!,
-                      width: 50,
-                      height: 50,
-                      child: const Icon(
-                        Icons.local_taxi,
-                        color: Colors.red,
-                        size: 40,
-                      ),
-                    ),
-                ],
-              ),
-            ],
+            polylines: polylines,
+
+            myLocationEnabled: true,
+
+            myLocationButtonEnabled: true,
+
+            zoomControlsEnabled: false,
           ),
 
-          /// 🔥 ETA
           Positioned(
             bottom: 20,
             left: 20,
             right: 20,
+
             child: Container(
               padding: const EdgeInsets.all(16),
+
               decoration: BoxDecoration(
                 color: const Color(0xFF0F2347),
                 borderRadius: BorderRadius.circular(16),
               ),
+
               child: Text(
                 status == "accepted"
                     ? "🚑 Driver is preparing..."
@@ -247,6 +317,7 @@ class _TrackDriverScreenState extends State<TrackDriverScreen> {
                     : (etaMinutes > 0
                           ? "🚑 Driver arriving in $etaMinutes min"
                           : "Calculating..."),
+
                 style: const TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),

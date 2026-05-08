@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:resq_app/core/constants/app_color.dart';
 import 'package:resq_app/features/emergency/data/model/active_request_mode.dart';
 import 'package:resq_app/features/home/presentation/widgets_user/track_driver_screen.dart';
 
@@ -9,47 +10,63 @@ class ActiveRequestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool canTrack =
+        request.status == "accepted" || request.status == "on_way";
+
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF2E5BFF), width: 1),
-        color: const Color(0xFF0F2347),
+        border: Border.all(color: AppColors.accent.withValues(alpha: 0.7)),
+        color: AppColors.surface,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.16),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
+
       child: Column(
         children: [
           Row(
             children: [
               Container(
-                width: 8,
-                height: 8,
+                width: 10,
+                height: 10,
                 decoration: BoxDecoration(
                   color: _statusColor(request.status),
                   shape: BoxShape.circle,
                 ),
               ),
+
               const SizedBox(width: 8),
+
               Text(
-                request.status.toUpperCase(),
-                style: TextStyle(color: _statusColor(request.status)),
+                _statusText(request.status),
+                style: TextStyle(
+                  color: _statusColor(request.status),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
 
-          const SizedBox(height: 15),
+          const SizedBox(height: 18),
 
           Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: const BoxDecoration(
-                  color: Color(0xFF2E6BFF),
+                  color: AppColors.accent,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.local_taxi, color: Colors.white),
               ),
 
-              const SizedBox(width: 10),
+              const SizedBox(width: 12),
 
               Expanded(
                 child: Column(
@@ -60,13 +77,14 @@ class ActiveRequestCard extends StatelessWidget {
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
+                        fontSize: 15,
                       ),
                     ),
 
                     const SizedBox(height: 4),
 
                     Text(
-                      request.driverPhone ?? "",
+                      request.driverPhone ?? "Waiting for driver details",
                       style: const TextStyle(color: Colors.white54),
                     ),
                   ],
@@ -75,25 +93,33 @@ class ActiveRequestCard extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 15),
+          const SizedBox(height: 18),
 
           SizedBox(
             width: double.infinity,
-            height: 60,
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => TrackDriverScreen(
-                      requestId: request.id,
-                      userLat: request.lat,
-                      userLng: request.lng,
-                    ),
-                  ),
-                );
-              },
-              child: const Text("Track Driver"),
+            height: 58,
+            child: ElevatedButton.icon(
+              onPressed: canTrack
+                  ? () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => TrackDriverScreen(
+                            requestId: request.id,
+                            userLat: request.lat,
+                            userLng: request.lng,
+                          ),
+                        ),
+                      );
+                    }
+                  : null,
+
+              icon: const Icon(Icons.navigation),
+
+              label: const Text(
+                "Track Driver",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
           ),
         ],
@@ -105,12 +131,31 @@ class ActiveRequestCard extends StatelessWidget {
     switch (status) {
       case "pending":
         return Colors.orange;
+
       case "accepted":
-        return Colors.blue;
+        return AppColors.accent;
+
       case "on_way":
-        return Colors.green;
+        return AppColors.success;
+
       default:
         return Colors.grey;
+    }
+  }
+
+  String _statusText(String status) {
+    switch (status) {
+      case "pending":
+        return "SEARCHING";
+
+      case "accepted":
+        return "DRIVER ACCEPTED";
+
+      case "on_way":
+        return "ON THE WAY";
+
+      default:
+        return status.toUpperCase();
     }
   }
 }

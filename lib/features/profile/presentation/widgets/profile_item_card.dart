@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:resq_app/core/constants/app_color.dart';
+import 'package:resq_app/core/theme/theme_ext.dart';
 
 class ProfileItemCard extends StatelessWidget {
   final IconData icon;
@@ -22,50 +24,34 @@ class ProfileItemCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(18),
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(20),
-
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18),
-
-          /// gradient مناسب مع الخلفية الداكنة
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF13294B), Color(0xFF0F2347)],
+            colors: [context.surfaceLightColor, context.surfaceColor],
           ),
-
-          /// border خفيف
-          border: Border.all(color: const Color(0xFF1E3A6D), width: 1),
-
-          /// shadow بسيط
-          boxShadow: const [
+          border: Border.all(color: context.borderColor),
+          boxShadow: [
             BoxShadow(
-              color: Colors.black26,
-              blurRadius: 10,
-              offset: Offset(0, 4),
+              color: Colors.black.withValues(alpha: 0.18),
+              blurRadius: 14,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
-
         child: Row(
           children: [
-            /// Icon box
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFF1E3A6D),
+                color: context.borderColor.withValues(alpha: 0.75),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(
-                icon,
-                color: color ?? const Color(0xFF2563EB),
-                size: 22,
-              ),
+              child: Icon(icon, color: color ?? AppColors.primary, size: 22),
             ),
-
             const SizedBox(width: 14),
-
-            /// Texts
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,26 +59,28 @@ class ProfileItemCard extends StatelessWidget {
                   Text(
                     title,
                     style: TextStyle(
-                      color: color ?? Colors.white,
+                      color: color ?? context.textColor,
                       fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-
                   const SizedBox(height: 4),
-
                   Text(
                     subtitle,
-                    style: const TextStyle(
-                      color: Color(0xFF94A3B8),
+                    style: TextStyle(
+                      color: context.textSecondaryColor,
                       fontSize: 13,
+                      height: 1.3,
                     ),
                   ),
                 ],
               ),
             ),
-
-            const Icon(Icons.chevron_right, color: Color(0xFF94A3B8), size: 20),
+            Icon(
+              Icons.chevron_right,
+              color: context.textSecondaryColor,
+              size: 20,
+            ),
           ],
         ),
       ),

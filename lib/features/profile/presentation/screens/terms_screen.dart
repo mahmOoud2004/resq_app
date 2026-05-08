@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:resq_app/core/theme/theme_ext.dart';
+import 'package:resq_app/core/constants/app_color.dart';
 import '../widgets/profile_item_card.dart';
 
 class TermsScreen extends StatelessWidget {
@@ -7,9 +9,9 @@ class TermsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF07142A),
+      backgroundColor: context.backgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF07142A),
+        backgroundColor: context.backgroundColor,
         elevation: 0,
         title: const Text(
           "Terms & Policies",

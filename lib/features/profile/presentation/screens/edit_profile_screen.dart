@@ -1,7 +1,9 @@
+import 'package:resq_app/core/theme/theme_ext.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:resq_app/core/constants/app_color.dart';
 import 'package:resq_app/features/profile/presentation/edit_profile/edit_profile_bloc.dart';
 import 'package:resq_app/features/profile/presentation/edit_profile/edit_profile_event.dart';
 import 'package:resq_app/features/profile/presentation/edit_profile/edit_profile_state.dart';
@@ -33,10 +35,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF07142A),
+      backgroundColor: context.backgroundColor,
 
       appBar: AppBar(
-        backgroundColor: const Color(0xFF07142A),
+        backgroundColor: context.backgroundColor,
         elevation: 0,
         title: const Text("Edit Profile"),
       ),
@@ -69,7 +71,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   onTap: pickImage,
                   child: CircleAvatar(
                     radius: 45,
-                    backgroundColor: const Color(0xFF2563EB),
+                    backgroundColor: AppColors.primary,
                     backgroundImage: image != null ? FileImage(image!) : null,
                     child: image == null
                         ? const Icon(Icons.camera_alt, color: Colors.white)
@@ -107,7 +109,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     },
 
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2563EB),
+                      backgroundColor: AppColors.primary,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
@@ -142,10 +144,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       decoration: InputDecoration(
         labelText: title,
 
-        labelStyle: const TextStyle(color: Colors.white54),
+        labelStyle: TextStyle(color: context.textSecondaryColor),
 
         filled: true,
-        fillColor: const Color(0xFF13294B),
+        fillColor: context.surfaceLightColor,
 
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),

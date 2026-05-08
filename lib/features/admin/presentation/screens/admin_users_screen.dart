@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:resq_app/core/theme/theme_ext.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:resq_app/core/constants/app_color.dart';
 
 import '../bloc/admin_bloc.dart';
 import '../bloc/admin_event.dart';
@@ -23,10 +25,10 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
       create: (_) => AdminBloc()..add(LoadAllUsers()),
 
       child: Scaffold(
-        backgroundColor: const Color(0xFF07142A),
+        backgroundColor: context.backgroundColor,
 
         appBar: AppBar(
-          backgroundColor: const Color(0xFF07142A),
+          backgroundColor: context.backgroundColor,
           title: const Text("Users"),
         ),
 
@@ -74,7 +76,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
 
                         filled: true,
 
-                        fillColor: const Color(0xFF0F1F3D),
+                        fillColor: context.surfaceColor,
 
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -105,8 +107,9 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                           padding: const EdgeInsets.all(14),
 
                           decoration: BoxDecoration(
-                            color: const Color(0xFF0F1F3D),
+                            color: context.surfaceColor,
                             borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: context.borderColor),
                           ),
 
                           child: Row(
@@ -154,8 +157,10 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
 
                                 decoration: BoxDecoration(
                                   color: user.role == "driver"
-                                      ? Colors.blue.withOpacity(.2)
-                                      : Colors.green.withOpacity(.2),
+                                      ? AppColors.accent.withValues(alpha: .18)
+                                      : AppColors.success.withValues(
+                                          alpha: .18,
+                                        ),
 
                                   borderRadius: BorderRadius.circular(20),
                                 ),
@@ -164,8 +169,8 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                                   approved.toUpperCase(),
                                   style: TextStyle(
                                     color: user.role == "driver"
-                                        ? Colors.blue
-                                        : Colors.green,
+                                        ? AppColors.accent
+                                        : AppColors.success,
                                   ),
                                 ),
                               ),

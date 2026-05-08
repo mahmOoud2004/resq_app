@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:resq_app/core/theme/theme_ext.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:resq_app/core/constants/app_color.dart';
 import 'package:resq_app/features/driver_emergency/data/models/driver_request_model.dart';
 import 'package:resq_app/features/driver_emergency/presentation/cubit/driver_emergency_cubit.dart';
 import 'package:resq_app/features/home/presentation/widgets_driver/driver_request_details_screen.dart';
@@ -24,8 +26,9 @@ class RequestCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF14273F),
+        color: context.surfaceLightColor,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.borderColor),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -50,7 +53,11 @@ class RequestCard extends StatelessWidget {
 
                 Row(
                   children: [
-                    const Icon(Icons.location_on, color: Colors.grey, size: 16),
+                    Icon(
+                      Icons.location_on,
+                      color: context.textSecondaryColor,
+                      size: 16,
+                    ),
                     const SizedBox(width: 4),
 
                     Expanded(
@@ -58,8 +65,8 @@ class RequestCard extends StatelessWidget {
                         "$distance away · $location",
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.grey,
+                        style: TextStyle(
+                          color: context.textSecondaryColor,
                           fontSize: 13,
                         ),
                       ),
@@ -88,7 +95,7 @@ class RequestCard extends StatelessWidget {
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF3A82F7),
+              backgroundColor: AppColors.accent,
               foregroundColor: Colors.white,
               elevation: 0,
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),

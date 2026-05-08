@@ -1,71 +1,90 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:resq_app/core/constants/app_color.dart';
+import 'package:resq_app/core/theme/theme_ext.dart';
+import 'package:resq_app/core/theme/theme_cubit.dart';
 
-class ThemeCard extends StatefulWidget {
+class ThemeCard extends StatelessWidget {
   const ThemeCard({super.key});
 
   @override
-  State<ThemeCard> createState() => _ThemeCardState();
-}
-
-class _ThemeCardState extends State<ThemeCard> {
-  bool darkMode = true;
-
-  @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
+    return BlocBuilder<ThemeCubit, ThemeMode>(
+      builder: (context, themeMode) {
+        final darkMode = themeMode == ThemeMode.dark;
 
-      decoration: BoxDecoration(
-        color: const Color(0xFF13294B),
-        borderRadius: BorderRadius.circular(18),
-      ),
+        return Container(
+          padding: const EdgeInsets.all(20),
 
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1C3A6B),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(Icons.dark_mode, color: Color(0xFF2563EB)),
+          decoration: BoxDecoration(
+            color: context.surfaceLightColor,
+
+            borderRadius: BorderRadius.circular(18),
+
+            border: Border.all(color: context.borderColor),
           ),
 
-          const SizedBox(width: 14),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
 
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Theme",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                decoration: BoxDecoration(
+                  color: context.borderColor.withOpacity(0.75),
+
+                  borderRadius: BorderRadius.circular(12),
                 ),
 
-                SizedBox(height: 3),
+                child: Icon(
+                  darkMode ? Icons.dark_mode : Icons.light_mode,
 
-                Text(
-                  "Switch between dark and light mode",
-                  style: TextStyle(color: Colors.white54, fontSize: 13),
+                  color: AppColors.primary,
                 ),
-              ],
-            ),
-          ),
+              ),
 
-          Switch(
-            value: darkMode,
-            onChanged: (v) {
-              setState(() {
-                darkMode = v;
-              });
-            },
+              const SizedBox(width: 14),
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+
+                  children: [
+                    Text(
+                      "Theme",
+
+                      style: TextStyle(
+                        color: context.textColor,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+
+                    const SizedBox(height: 3),
+
+                    Text(
+                      "Switch between dark and light mode",
+
+                      style: TextStyle(
+                        color: context.textSecondaryColor,
+
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              Switch(
+                value: darkMode,
+
+                onChanged: (v) {
+                  context.read<ThemeCubit>().toggleTheme();
+                },
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

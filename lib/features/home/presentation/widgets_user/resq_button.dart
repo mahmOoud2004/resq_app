@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:resq_app/core/constants/app_color.dart';
 
 class ResqButton extends StatelessWidget {
   const ResqButton({super.key});
@@ -10,9 +10,20 @@ class ResqButton extends StatelessWidget {
       child: Container(
         width: 200,
         height: 200,
-        decoration: const BoxDecoration(
-          color: Colors.red,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [AppColors.primaryLight, AppColors.primaryDark],
+          ),
           shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withValues(alpha: 0.32),
+              blurRadius: 32,
+              offset: const Offset(0, 14),
+            ),
+          ],
         ),
         child: const Column(
           mainAxisAlignment: MainAxisAlignment.center,

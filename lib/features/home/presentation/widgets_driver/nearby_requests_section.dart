@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:resq_app/core/theme/theme_ext.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:resq_app/core/constants/app_color.dart';
 
 import 'package:resq_app/features/driver_emergency/presentation/cubit/driver_emergency_cubit.dart';
 import 'package:resq_app/features/driver_emergency/presentation/cubit/driver_emergency_state.dart';
@@ -35,10 +37,10 @@ class NearbyRequestsSection extends StatelessWidget {
 
                 if (state is DriverEmergencyLoaded) {
                   if (state.requests.isEmpty) {
-                    return const Center(
+                    return Center(
                       child: Text(
                         "No Requests Available",
-                        style: TextStyle(color: Colors.white70),
+                        style: TextStyle(color: context.textSecondaryColor),
                       ),
                     );
                   }
@@ -62,7 +64,7 @@ class NearbyRequestsSection extends StatelessWidget {
                   return const Center(
                     child: Text(
                       "Failed to load requests",
-                      style: TextStyle(color: Colors.red),
+                      style: TextStyle(color: AppColors.danger),
                     ),
                   );
                 }

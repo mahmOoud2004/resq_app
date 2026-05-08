@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:resq_app/core/theme/theme_ext.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:resq_app/core/constants/app_color.dart';
 
 import 'package:resq_app/features/driver_emergency/presentation/cubit/driver_emergency_cubit.dart';
 
@@ -15,13 +17,13 @@ class DriverHomeScreen extends StatelessWidget {
     return BlocProvider(
       create: (_) => DriverEmergencyCubit()..loadRequests(),
       child: Scaffold(
-        backgroundColor: const Color(0xFF081A2F),
+        backgroundColor: context.backgroundColor,
         appBar: AppBar(
-          backgroundColor: const Color(0xFF081A2F),
+          backgroundColor: context.backgroundColor,
           elevation: 0,
           title: const Text(
             "ResQ Driver",
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
           ),
         ),
         body: const Padding(

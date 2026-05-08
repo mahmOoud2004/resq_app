@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:resq_app/config/routers/route_names.dart';
+import 'package:resq_app/core/constants/app_color.dart';
+import 'package:resq_app/core/theme/theme_ext.dart';
 import 'package:resq_app/core/storage/token_storage.dart';
 import 'package:resq_app/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:resq_app/features/profile/presentation/widgets/profile_item_card.dart';
 import 'package:resq_app/features/profile/presentation/widgets/theme_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/profile_header.dart';
+import 'package:resq_app/features/smart_health_notifications/presentation/screens/medical_information_screen.dart' as resq_smart_health;
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -15,7 +18,7 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF07142A),
+      backgroundColor: context.backgroundColor,
 
       body: SafeArea(
         child: SingleChildScrollView(
@@ -36,6 +39,22 @@ class ProfileScreen extends StatelessWidget {
                   context.push(
                     Routes.acount,
                     extra: context.read<ProfileBloc>(),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 20),
+
+              ProfileItemCard(
+                icon: Icons.medical_services,
+                title: "Medical Information",
+                subtitle: "Manage chronic diseases & health tips",
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const resq_smart_health.MedicalInformationScreen(),
+                    ),
                   );
                 },
               ),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:resq_app/core/theme/theme_ext.dart';
+import 'package:resq_app/core/constants/app_color.dart';
 
 class ProfileMenuItem extends StatelessWidget {
   final IconData icon;
@@ -24,8 +26,9 @@ class ProfileMenuItem extends StatelessWidget {
         padding: const EdgeInsets.all(16),
 
         decoration: BoxDecoration(
-          color: const Color.fromARGB(255, 50, 86, 139),
+          color: context.surfaceLightColor,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: context.borderColor),
         ),
 
         child: Row(

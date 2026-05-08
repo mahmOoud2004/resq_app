@@ -34,6 +34,7 @@ import 'package:resq_app/features/emergency/data/repositories/emergency_reposito
 import 'package:resq_app/features/emergency/presentation/bloc/emergency_bloc.dart';
 
 import 'route_names.dart';
+import 'package:resq_app/features/smart_health_notifications/presentation/screens/medical_information_screen.dart' as resq_smart_health;
 
 const bool skipAuth = false;
 
@@ -135,6 +136,12 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: Routes.terms,
       builder: (context, state) => const TermsScreen(),
+    ),
+
+    /// MEDICAL INFO (ONBOARDING)
+    GoRoute(
+      path: Routes.medicalInfo,
+      builder: (context, state) => const resq_smart_health.MedicalInformationScreen(),
     ),
 
     /// DRIVER HOME

@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'package:resq_app/core/theme/theme_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:resq_app/core/constants/app_color.dart';
 import 'package:resq_app/features/emergency/presentation/bloc/emergency_bloc.dart';
 import 'package:resq_app/features/home/presentation/widgets_user/emergency_button.dart';
 import 'package:resq_app/features/home/presentation/widgets_user/home_header.dart';
@@ -101,7 +103,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        backgroundColor: const Color(0xFF07142A),
+        backgroundColor: context.backgroundColor,
 
         body: SingleChildScrollView(
           child: Padding(
@@ -158,8 +160,12 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                       return Column(
                         children: const [
                           Text(
-                            "تم إنهاء الرحلة ✅",
-                            style: TextStyle(color: Colors.green, fontSize: 16),
+                            "Trip completed successfully",
+                            style: TextStyle(
+                              color: AppColors.success,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                           SizedBox(height: 40),
                         ],

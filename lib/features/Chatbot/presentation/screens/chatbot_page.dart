@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:resq_app/core/theme/theme_ext.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dio/dio.dart';
+import 'package:resq_app/core/constants/app_color.dart';
 
 import '../../data/datasource/chatbot_remote_datasource.dart';
 import '../../data/models/chat_message_model.dart';
@@ -80,10 +82,10 @@ class _ChatbotPageState extends State<ChatbotPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xff0B1A2B),
+      backgroundColor: context.backgroundColor,
 
       appBar: AppBar(
-        backgroundColor: const Color(0xff0B1A2B),
+        backgroundColor: context.backgroundColor,
         title: const Text("ResQ Assistant"),
       ),
 
@@ -107,7 +109,10 @@ class _ChatbotPageState extends State<ChatbotPage> {
 
           Container(
             padding: const EdgeInsets.all(12),
-            color: const Color(0xff132338),
+            decoration: BoxDecoration(
+              color: context.surfaceColor,
+              border: Border(top: BorderSide(color: context.borderColor)),
+            ),
             child: Row(
               children: [
                 Expanded(
@@ -116,9 +121,9 @@ class _ChatbotPageState extends State<ChatbotPage> {
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: "Describe your emergency...",
-                      hintStyle: const TextStyle(color: Colors.white54),
+                      hintStyle: TextStyle(color: context.textSecondaryColor),
                       filled: true,
-                      fillColor: const Color(0xff1E2C3F),
+                      fillColor: context.surfaceLightColor,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
                         borderSide: BorderSide.none,
@@ -130,7 +135,11 @@ class _ChatbotPageState extends State<ChatbotPage> {
                 const SizedBox(width: 8),
 
                 IconButton(
-                  icon: const Icon(Icons.send, color: Colors.white),
+                  style: IconButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                  ),
+                  icon: const Icon(Icons.send),
                   onPressed: sendMessage,
                 ),
               ],

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:resq_app/core/theme/theme_ext.dart';
+import 'package:resq_app/core/constants/app_color.dart';
 
 class EmergencyOptionsGrid extends StatelessWidget {
   final List<String> selected;
@@ -98,13 +100,13 @@ class EmergencyOptionCard extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: selected
-                  ? [color.withOpacity(.35), const Color(0xFF13294B)]
-                  : [color.withOpacity(.15), const Color(0xFF13294B)],
+                  ? [color.withValues(alpha: .35), context.surfaceLightColor]
+                  : [color.withValues(alpha: .15), context.surfaceLightColor],
             ),
 
             /// border
             border: Border.all(
-              color: selected ? color : color.withOpacity(.7),
+              color: selected ? color : color.withValues(alpha: .7),
               width: 1.5,
             ),
 
@@ -112,7 +114,7 @@ class EmergencyOptionCard extends StatelessWidget {
             boxShadow: [
               if (selected)
                 BoxShadow(
-                  color: color.withOpacity(.4),
+                  color: color.withValues(alpha: .34),
                   blurRadius: 25,
                   spreadRadius: 1,
                 ),
@@ -126,7 +128,7 @@ class EmergencyOptionCard extends StatelessWidget {
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: color,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(14),
                 ),
                 child: Icon(icon, color: Colors.white, size: 26),
               ),

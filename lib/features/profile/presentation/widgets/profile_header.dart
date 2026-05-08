@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:resq_app/core/constants/app_color.dart';
+import 'package:resq_app/core/theme/theme_ext.dart';
 import '../bloc/profile_bloc.dart';
 import '../bloc/profile_state.dart';
 
@@ -26,7 +28,7 @@ class ProfileHeader extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 45,
-                  backgroundColor: const Color(0xFF2563EB),
+                  backgroundColor: AppColors.primary,
                   child: CircleAvatar(
                     radius: 40,
                     backgroundImage: (image != null && image.isNotEmpty)
@@ -45,10 +47,7 @@ class ProfileHeader extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.green,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: const Color(0xFF07142A),
-                        width: 2,
-                      ),
+                      border: Border.all(color: context.backgroundColor, width: 2),
                     ),
                   ),
                 ),
@@ -59,9 +58,9 @@ class ProfileHeader extends StatelessWidget {
 
             Text(
               name,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 28,
+              style: TextStyle(
+                color: context.textColor,
+                fontSize: 26,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -70,7 +69,10 @@ class ProfileHeader extends StatelessWidget {
 
             Text(
               email,
-              style: const TextStyle(color: Colors.white54, fontSize: 14),
+              style: TextStyle(
+                color: context.textSecondaryColor,
+                fontSize: 14,
+              ),
             ),
           ],
         );

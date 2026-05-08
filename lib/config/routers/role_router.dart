@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:resq_app/features/home/presentation/screens/manger_home_screen.dart';
+
 import 'package:resq_app/features/navigation/presentation/screen/main_screen.dart';
 import 'package:resq_app/features/home/presentation/screens/driver_home_screen.dart';
 
@@ -10,8 +10,6 @@ class RoleRouter {
         return const DriverHomeScreen();
 
       case "manager":
-        return const ManagerHomeScreen();
-
       default:
         return const MainScreen();
     }

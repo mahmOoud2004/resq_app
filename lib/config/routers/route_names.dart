@@ -9,6 +9,7 @@ class Routes {
 
   static const acount = '/account';
   static const editProfile = '/editProfile'; // NEW
+  static const medicalInfo = '/medicalInfo';
 
   static const support = '/support';
   static const terms = '/terms';

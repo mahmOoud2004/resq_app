@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class DriverMapScreen extends StatelessWidget {
   final double userLat;
@@ -16,37 +15,26 @@ class DriverMapScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final userLocation = LatLng(userLat, userLng);
 
-    return FlutterMap(
-      options: MapOptions(initialCenter: userLocation, initialZoom: 15),
-      children: [
-        TileLayer(
-          urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-          userAgentPackageName: 'com.resq.app',
-        ),
+    return GoogleMap(
+      initialCameraPosition: CameraPosition(target: userLocation, zoom: 15),
 
-        MarkerLayer(
-          markers: [
-            /// 🔴 USER LOCATION
-            Marker(
-              point: userLocation,
-              width: 60,
-              height: 60,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 3),
-                ),
-                child: const Icon(
-                  Icons.location_on,
-                  color: Colors.white,
-                  size: 30,
-                ),
-              ),
-            ),
-          ],
+      markers: {
+        Marker(
+          markerId: const MarkerId("user_location"),
+
+          position: userLocation,
+
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+
+          infoWindow: const InfoWindow(title: "User Location"),
         ),
-      ],
+      },
+
+      myLocationEnabled: true,
+
+      myLocationButtonEnabled: true,
+
+      zoomControlsEnabled: false,
     );
   }
 }

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:resq_app/core/constants/app_color.dart';
+import 'package:resq_app/core/theme/theme_ext.dart';
+
 import '../bloc/admin_bloc.dart';
 import '../bloc/admin_event.dart';
 import '../bloc/admin_state.dart';
@@ -11,7 +14,7 @@ class AdminDashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF07142A),
+      backgroundColor: context.backgroundColor,
 
       body: SafeArea(
         child: Padding(
@@ -38,7 +41,7 @@ class AdminDashboardScreen extends StatelessWidget {
 
                       const SizedBox(height: 20),
 
-                      /// 🔥 GRID
+                      /// GRID
                       GridView.count(
                         crossAxisCount: 2,
                         shrinkWrap: true,
@@ -52,24 +55,28 @@ class AdminDashboardScreen extends StatelessWidget {
                             state.stats.totalUsers.toString(),
                             "Users",
                             Icons.people,
+                            context,
                           ),
 
                           _statCard(
                             state.stats.totalDrivers.toString(),
                             "Drivers",
                             Icons.drive_eta,
+                            context,
                           ),
 
                           _statCard(
                             state.stats.pendingUsers.toString(),
                             "Pending",
                             Icons.hourglass_bottom,
+                            context,
                           ),
 
                           _statCard(
                             state.stats.activeEmergencies.toString(),
                             "Active",
                             Icons.warning,
+                            context,
                           ),
                         ],
                       ),
@@ -79,6 +86,7 @@ class AdminDashboardScreen extends StatelessWidget {
                       /// HEADER
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
                         children: [
                           const Text(
                             "Live Requests",
@@ -90,12 +98,15 @@ class AdminDashboardScreen extends StatelessWidget {
                               horizontal: 10,
                               vertical: 4,
                             ),
+
                             decoration: BoxDecoration(
-                              color: Colors.red,
+                              color: AppColors.primary,
                               borderRadius: BorderRadius.circular(20),
                             ),
+
                             child: Text(
                               "${state.emergencies.length} Active",
+
                               style: const TextStyle(color: Colors.white),
                             ),
                           ),
@@ -139,27 +150,35 @@ class AdminDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _statCard(String number, String title, IconData icon) {
+  Widget _statCard(
+    String number,
+    String title,
+    IconData icon,
+    BuildContext context,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
 
       decoration: BoxDecoration(
-        color: const Color(0xFF0F1F3D),
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: context.borderColor),
       ),
 
       child: Row(
         children: [
-          Icon(icon, color: Colors.blue, size: 26),
+          Icon(icon, color: AppColors.accent, size: 26),
 
           const SizedBox(width: 10),
 
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
+
             children: [
               Text(
                 number,
+
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 18,
@@ -199,33 +218,39 @@ class _RequestCard extends StatelessWidget {
     required this.date,
   });
 
-  Color getStatusColor() {
+  Color getStatusColor(BuildContext context) {
     switch (status.toLowerCase()) {
       case "waiting":
-        return Colors.orange;
+        return AppColors.warning;
+
       case "accepted":
-        return Colors.green;
+        return AppColors.success;
+
       case "in_progress":
-        return Colors.blue;
+        return AppColors.accent;
+
       default:
-        return Colors.grey;
+        return context.textMutedColor;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final color = getStatusColor();
+    final color = getStatusColor(context);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
+
       decoration: BoxDecoration(
-        color: const Color(0xFF0F1F3D),
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: context.borderColor),
       ),
 
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+
         children: [
           /// HEADER
           Row(
@@ -233,6 +258,7 @@ class _RequestCard extends StatelessWidget {
               const CircleAvatar(
                 radius: 22,
                 backgroundColor: Color(0xFF1C335A),
+
                 child: Icon(Icons.person, color: Colors.white),
               ),
 
@@ -241,6 +267,7 @@ class _RequestCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   name,
+
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -253,12 +280,15 @@ class _RequestCard extends StatelessWidget {
                   horizontal: 10,
                   vertical: 4,
                 ),
+
                 decoration: BoxDecoration(
-                  color: color.withOpacity(.2),
+                  color: color.withValues(alpha: .18),
                   borderRadius: BorderRadius.circular(20),
                 ),
+
                 child: Text(
                   status,
+
                   style: TextStyle(color: color, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -275,9 +305,12 @@ class _RequestCard extends StatelessWidget {
                 color: Colors.white54,
                 size: 18,
               ),
+
               const SizedBox(width: 8),
+
               Text(
                 "Service : $service",
+
                 style: const TextStyle(color: Colors.white70),
               ),
             ],
@@ -289,7 +322,9 @@ class _RequestCard extends StatelessWidget {
           Row(
             children: [
               const Icon(Icons.phone, color: Colors.white54, size: 18),
+
               const SizedBox(width: 8),
+
               Text(phone, style: const TextStyle(color: Colors.white70)),
             ],
           ),
@@ -300,9 +335,12 @@ class _RequestCard extends StatelessWidget {
           Row(
             children: [
               const Icon(Icons.drive_eta, color: Colors.white54, size: 18),
+
               const SizedBox(width: 8),
+
               Text(
                 "Driver : $driver",
+
                 style: const TextStyle(color: Colors.white70),
               ),
             ],
@@ -313,10 +351,13 @@ class _RequestCard extends StatelessWidget {
           /// LOCATION
           Row(
             children: [
-              const Icon(Icons.location_on, color: Colors.red, size: 18),
+              const Icon(Icons.location_on, color: AppColors.primary, size: 18),
+
               const SizedBox(width: 8),
+
               Text(
                 "$lat , $lng",
+
                 style: const TextStyle(color: Colors.white60),
               ),
             ],
@@ -328,7 +369,9 @@ class _RequestCard extends StatelessWidget {
           Row(
             children: [
               const Icon(Icons.access_time, color: Colors.white54, size: 18),
+
               const SizedBox(width: 8),
+
               Text(date, style: const TextStyle(color: Colors.white60)),
             ],
           ),
@@ -338,10 +381,16 @@ class _RequestCard extends StatelessWidget {
           /// CANCEL BUTTON
           SizedBox(
             width: double.infinity,
+
             child: ElevatedButton.icon(
               icon: const Icon(Icons.cancel),
+
               label: const Text("Cancel Request"),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+              ),
+
               onPressed: () {
                 context.read<AdminBloc>().add(CancelEmergencyEvent(id));
               },

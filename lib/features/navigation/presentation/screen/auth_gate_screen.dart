@@ -82,7 +82,7 @@ class _AuthGateScreenState extends State<AuthGateScreen> {
       /// USER
       if (normalizedRole == "user") {
         debugPrint("👤 OPEN USER HOME");
-        context.go(Routes.home);
+        _checkMedicalProfileAndNavigate();
       }
       /// DRIVER
       else if (normalizedRole == "driver") {
@@ -100,6 +100,22 @@ class _AuthGateScreenState extends State<AuthGateScreen> {
         context.go(Routes.login);
       }
     });
+  }
+
+  Future<void> _checkMedicalProfileAndNavigate() async {
+    final prefs = await SharedPreferences.getInstance();
+    // Assuming we use SharedPreferences key 'medical_profile_data'
+    // as defined in MedicalProfileStorage
+    final hasMedicalProfile = prefs.containsKey('medical_profile_data');
+    
+    if (!mounted) return;
+    
+    if (!hasMedicalProfile) {
+      debugPrint("🩺 FIRST TIME: OPEN MEDICAL INFO");
+      context.go(Routes.medicalInfo);
+    } else {
+      context.go(Routes.home);
+    }
   }
 
   @override

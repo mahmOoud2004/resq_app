@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:resq_app/core/theme/theme_ext.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:resq_app/core/constants/app_color.dart';
 
 import 'package:resq_app/features/admin/presentation/bloc/admin_bloc.dart';
 import 'package:resq_app/features/admin/presentation/bloc/admin_event.dart';
@@ -57,9 +59,9 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
         body: screens[currentIndex],
 
         bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: const Color(0xFF07142A),
-          selectedItemColor: const Color(0xFF2563EB),
-          unselectedItemColor: Colors.grey,
+          backgroundColor: context.backgroundColor,
+          selectedItemColor: AppColors.primary,
+          unselectedItemColor: context.textMutedColor,
           type: BottomNavigationBarType.fixed,
 
           currentIndex: currentIndex,

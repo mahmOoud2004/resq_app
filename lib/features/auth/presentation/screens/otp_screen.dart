@@ -1,3 +1,4 @@
+import 'package:resq_app/core/theme/theme_ext.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -56,6 +57,7 @@ class OtpScreen extends StatelessWidget {
         },
         builder: (context, state) {
           return Scaffold(
+            backgroundColor: context.backgroundColorDeep,
             resizeToAvoidBottomInset: true,
             body: SafeArea(
               child: SingleChildScrollView(
@@ -76,7 +78,7 @@ class OtpScreen extends StatelessWidget {
                       const Text(
                         "ResQ",
                         style: TextStyle(
-                          fontSize: 34,
+                          fontSize: 40,
                           fontWeight: FontWeight.bold,
                           color: AppColors.primary,
                         ),
@@ -86,7 +88,11 @@ class OtpScreen extends StatelessWidget {
 
                       const Text(
                         "OTP Verification",
-                        style: TextStyle(color: Colors.white, fontSize: 20),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
 
                       const SizedBox(height: 10),
@@ -94,7 +100,10 @@ class OtpScreen extends StatelessWidget {
                       Text(
                         "Please enter the 4 digit code\nsent to $email",
                         textAlign: TextAlign.center,
-                        style: const TextStyle(color: Colors.grey),
+                        style: TextStyle(
+                          color: context.textSecondaryColor,
+                          height: 1.4,
+                        ),
                       ),
 
                       const SizedBox(height: 35),
@@ -146,7 +155,7 @@ class OtpScreen extends StatelessWidget {
                       Text.rich(
                         TextSpan(
                           text: "Didn't receive the code? ",
-                          style: const TextStyle(color: Colors.black),
+                          style: const TextStyle(color: Colors.white70),
                           children: [
                             TextSpan(
                               text: "Resend OTP",
@@ -182,14 +191,22 @@ class OtpScreen extends StatelessWidget {
         keyboardType: TextInputType.number,
         textAlign: TextAlign.center,
         maxLength: 1,
-        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+        style: const TextStyle(
+          color: AppColors.fieldText,
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+        ),
         decoration: InputDecoration(
           counterText: "",
           filled: true,
-          fillColor: AppColors.fieldColor,
+          fillColor: context.fieldColor,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: AppColors.primary, width: 1.4),
           ),
         ),
         onChanged: (value) {

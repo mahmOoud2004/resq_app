@@ -1,3 +1,4 @@
+import 'package:resq_app/core/theme/theme_ext.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -47,97 +48,110 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
           }
         },
         child: Scaffold(
-          body: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                /// Logo
-                const Text(
-                  "ResQ",
-                  style: TextStyle(
-                    fontSize: 34,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                  ),
+          backgroundColor: context.backgroundColorDeep,
+          resizeToAvoidBottomInset: true,
+          body: SafeArea(
+            child: SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: const EdgeInsets.all(24),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.of(context).size.height - 96,
                 ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      "ResQ",
+                      style: TextStyle(
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
+                    ),
 
-                const SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
-                /// Title
-                const Text(
-                  "Forget Password",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white, fontSize: 20),
-                ),
+                    const Text(
+                      "Forget Password",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
 
-                const SizedBox(height: 10),
+                    const SizedBox(height: 10),
 
-                /// Description
-                const Text(
-                  "Enter your email or phone number\nwe will send you a verification code",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey),
-                ),
+                    Text(
+                      "Enter your email or phone number\nwe will send you a verification code",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: context.textSecondaryColor,
+                        height: 1.4,
+                      ),
+                    ),
 
-                const SizedBox(height: 30),
+                    const SizedBox(height: 30),
 
-                /// Input
-                AppTextField(
-                  hint: "Email or phone number",
-                  controller: emailOrPhoneController,
-                ),
+                    AppTextField(
+                      hint: "Email or phone number",
+                      controller: emailOrPhoneController,
+                    ),
 
-                const SizedBox(height: 25),
+                    const SizedBox(height: 25),
 
-                /// Button
-                BlocBuilder<AuthCubit, AuthState>(
-                  builder: (context, state) {
-                    if (state is AuthLoading) {
-                      return const CircularProgressIndicator();
-                    }
-
-                    return AppButton(
-                      text: "Send Code",
-                      onTap: () {
-                        final email = emailOrPhoneController.text.trim();
-
-                        if (email.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Enter your email")),
-                          );
-                          return;
+                    BlocBuilder<AuthCubit, AuthState>(
+                      builder: (context, state) {
+                        if (state is AuthLoading) {
+                          return const CircularProgressIndicator();
                         }
 
-                        context.read<AuthCubit>().forgotPassword(email);
-                      },
-                    );
-                  },
-                ),
+                        return AppButton(
+                          text: "Send Code",
+                          onTap: () {
+                            final email = emailOrPhoneController.text.trim();
 
-                const SizedBox(height: 20),
+                            if (email.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Enter your email"),
+                                ),
+                              );
+                              return;
+                            }
 
-                /// Back to login
-                Text.rich(
-                  TextSpan(
-                    text: "Remember your password? ",
-                    style: const TextStyle(color: Colors.white),
-                    children: [
-                      TextSpan(
-                        text: "Login",
-                        style: const TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            context.pop();
+                            context.read<AuthCubit>().forgotPassword(email);
                           },
+                        );
+                      },
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    Text.rich(
+                      TextSpan(
+                        text: "Remember your password? ",
+                        style: const TextStyle(color: Colors.white70),
+                        children: [
+                          TextSpan(
+                            text: "Login",
+                            style: const TextStyle(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                context.pop();
+                              },
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),

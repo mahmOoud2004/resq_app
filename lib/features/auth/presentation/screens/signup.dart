@@ -1,3 +1,4 @@
+import 'package:resq_app/core/theme/theme_ext.dart';
 import 'dart:io';
 
 import 'package:flutter/gestures.dart';
@@ -75,9 +76,12 @@ class _SignupScreenState extends State<SignupScreen> {
         },
         builder: (context, state) {
           return Scaffold(
-            body: Padding(
-              padding: const EdgeInsets.all(24),
+            backgroundColor: context.backgroundColorDeep,
+            body: SafeArea(
               child: SingleChildScrollView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: const EdgeInsets.all(24),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -87,15 +91,28 @@ class _SignupScreenState extends State<SignupScreen> {
                       const Text(
                         "ResQ",
                         style: TextStyle(
-                          fontSize: 34,
+                          fontSize: 40,
                           fontWeight: FontWeight.bold,
                           color: AppColors.primary,
                         ),
                       ),
 
                       const SizedBox(height: 20),
-                      const Text("Create Account", style: TextStyle()),
-                      const SizedBox(height: 30),
+                      const Text(
+                        "Create Account",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        "Join ResQ and keep emergency help closer.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: context.textSecondaryColor),
+                      ),
+                      const SizedBox(height: 32),
 
                       AppTextField(
                         hint: "First Name",
@@ -192,7 +209,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         alignment: Alignment.centerLeft,
                         child: Text(
                           "Select Account Type",
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             color: AppColors.primary,
                           ),
@@ -281,14 +298,19 @@ class _SignupScreenState extends State<SignupScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: selected ? AppColors.primary : AppColors.fieldColor,
-          borderRadius: BorderRadius.circular(10),
+          color: selected ? AppColors.primary : context.fieldColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: selected
+                ? AppColors.primaryLight
+                : AppColors.primary.withValues(alpha: 0.12),
+          ),
         ),
         child: Center(
           child: Text(
             title,
             style: TextStyle(
-              color: selected ? Colors.white : Colors.black,
+              color: selected ? Colors.white : AppColors.fieldText,
               fontWeight: FontWeight.bold,
             ),
           ),

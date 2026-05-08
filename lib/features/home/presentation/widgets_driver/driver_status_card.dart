@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:resq_app/core/theme/theme_ext.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:resq_app/core/constants/app_color.dart';
 import 'package:resq_app/features/driver_emergency/presentation/cubit/driver_emergency_cubit.dart';
 
 class DriverStatusCard extends StatefulWidget {
@@ -17,8 +19,9 @@ class _DriverStatusCardState extends State<DriverStatusCard> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF14273F),
+        color: context.surfaceLightColor,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.borderColor),
       ),
       child: Row(
         children: [
@@ -35,14 +38,14 @@ class _DriverStatusCardState extends State<DriverStatusCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   "Driver Status",
-                  style: TextStyle(color: Colors.grey),
+                  style: TextStyle(color: context.textSecondaryColor),
                 ),
                 Text(
                   isOnline ? "Available for requests" : "Offline",
                   style: TextStyle(
-                    color: isOnline ? Colors.green : Colors.red,
+                    color: isOnline ? AppColors.success : AppColors.danger,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -53,7 +56,7 @@ class _DriverStatusCardState extends State<DriverStatusCard> {
           /// 🔥 Switch
           Switch(
             value: isOnline,
-            activeColor: Colors.green,
+            activeThumbColor: AppColors.success,
             onChanged: (value) {
               setState(() => isOnline = value);
 
