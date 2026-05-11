@@ -1,27 +1,31 @@
-````md
 <div align="center">
 
 # 🚑 ResQ
 
-### Smart Emergency Response & Healthcare Assistant
+### Smart Emergency Response & AI Healthcare Assistant
 
 <p align="center">
   <img src="https://img.shields.io/badge/Flutter-3.x-02569B?style=for-the-badge&logo=flutter&logoColor=white" />
   <img src="https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white" />
   <img src="https://img.shields.io/badge/Firebase-Backend-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" />
+  <img src="https://img.shields.io/badge/Google%20Maps-Live%20Tracking-34A853?style=for-the-badge&logo=googlemaps&logoColor=white" />
   <img src="https://img.shields.io/badge/AI-Powered-8A2BE2?style=for-the-badge" />
   <img src="https://img.shields.io/badge/Status-Active%20Development-00C853?style=for-the-badge" />
 </p>
 
 <br>
 
-<h3>
+<h3 align="center">
 💙 Saving Lives Faster with Smart Emergency Technology
 </h3>
 
 <p align="center">
-ResQ combines emergency response systems, AI healthcare assistance, live tracking,  
-and smart medical notifications into one powerful mobile experience.
+ResQ combines emergency response systems, AI healthcare assistance,  
+live location tracking, and smart medical notifications into one modern mobile experience.
+</p>
+
+<p align="center">
+  🚨 Emergency Support • 📍 Live Tracking • 🤖 AI Assistant • 🩺 Smart Notifications
 </p>
 
 ---
@@ -30,16 +34,16 @@ and smart medical notifications into one powerful mobile experience.
 
 # 📖 About ResQ
 
-**ResQ** is a modern emergency and healthcare mobile application built using Flutter.  
-The app is designed to improve emergency response speed, provide intelligent healthcare support, and deliver a smooth real-time experience for users and drivers.
+**ResQ** is a modern Flutter-based emergency and healthcare application designed to improve emergency response speed and provide intelligent healthcare assistance in real time.
 
-Whether it's:
-- 🚨 Sending an emergency request
-- 📍 Tracking drivers live
-- 🤖 Talking with an AI medical assistant
-- 🩺 Receiving smart health reminders
+The application focuses on building a reliable ecosystem where users can:
+- 🚨 Send emergency requests instantly
+- 📍 Track emergency drivers live
+- 🤖 Communicate with an AI healthcare assistant
+- 🩺 Receive personalized smart health notifications
+- 📡 Access real-time medical support features
 
-ResQ helps users stay safer and more connected during critical situations.
+ResQ aims to deliver a smooth, fast, and life-saving mobile experience powered by modern technologies.
 
 ---
 
@@ -49,71 +53,82 @@ ResQ helps users stay safer and more connected during critical situations.
 
 <table>
 <tr>
+
 <td width="50%">
 
 ### ⚡ Instant Emergency Requests
 - One-tap emergency creation
 - Fast emergency workflow
-- Real-time status updates
+- Real-time emergency status
+- Immediate response handling
 
 </td>
 
 <td width="50%">
 
-### 🚑 Live Driver Tracking
-- Track drivers in real-time
+### 🚑 Real-Time Driver Tracking
+- Live driver location updates
 - Active emergency monitoring
-- Dynamic location updates
+- Dynamic movement tracking
+- Continuous route updates
 
 </td>
+
 </tr>
 </table>
 
 ---
 
-## 🩺 Smart Health Notifications
+# 🩺 Smart Health Notifications
 
-### 🔔 Personalized Medical Support
+## 🔔 Personalized Medical Support
+
 - Smart daily reminders
 - Disease-based notifications
-- Personalized health profile
-- Intelligent scheduling system
-- Health monitoring assistance
-
-### 🧬 Supported Medical Conditions
-
-<p align="center">
-
-`Diabetes` • `Hypertension` • `Asthma` • `Heart Disease`  
-`Epilepsy` • `Kidney Disease` • `Obesity` • `Anemia`
-
-</p>
+- Personalized health profile system
+- Intelligent notification scheduling
+- Medical awareness reminders
 
 ---
 
-## 📍 Maps & Navigation
+## 🧬 Supported Medical Conditions
 
 <div align="center">
 
-| Feature | Description |
-|---|---|
-| 🗺️ Google Maps | Interactive map integration |
-| 📡 Live Tracking | Real-time user & driver locations |
-| 🚗 Driver Navigation | Route visualization system |
-| ⏱️ Fast Updates | Location refresh every few seconds |
+`Diabetes` • `Hypertension` • `Asthma` • `Heart Disease`
+
+`Epilepsy` • `Kidney Disease` • `Obesity` • `Anemia`
 
 </div>
 
 ---
 
-## 🤖 AI Healthcare Assistant
+# 📍 Maps & Navigation System
 
-### Smart Medical Experience
-- AI-powered healthcare assistant
+<div align="center">
+
+| Feature | Description |
+|---|---|
+| 🗺️ Google Maps Integration | Interactive live maps |
+| 📡 Live Location Tracking | Real-time user & driver updates |
+| 🚗 Driver Navigation | Route visualization & movement |
+| ⏱️ Fast Location Refresh | Continuous tracking updates |
+| 📍 Emergency Location Sharing | Instant location access |
+
+</div>
+
+---
+
+# 🤖 AI Healthcare Assistant
+
+## Smart AI Medical Experience
+
+- AI-powered medical assistant
+- Smart healthcare conversations
 - Prescription analysis
-- Smart medical recommendations
-- Healthcare conversations
-- Personalized guidance support
+- Medical recommendations
+- Personalized healthcare guidance
+- Smart medical support system
 
 ---
 
@@ -146,65 +161,3 @@ lib
 │   └── splash
 │
 └── main.dart
-````
-
----
-
-# 🛠️ Technologies Used
-
-<div align="center">
-
-| Technology      | Purpose                           |
-| --------------- | --------------------------------- |
-| Flutter         | Cross-platform mobile development |
-| Dart            | Application programming language  |
-| Firebase        | Backend & real-time services      |
-| Google Maps API | Maps & live navigation            |
-| AI APIs         | Smart healthcare assistance       |
-| REST APIs       | Backend communication             |
-
-</div>
-
----
-
-# 🎯 Project Vision
-
-ResQ aims to bridge the gap between:
-
-* Emergency response ⚡
-* Smart healthcare 🩺
-* Real-time communication 📡
-* AI assistance 🤖
-
-by providing an intelligent and reliable mobile platform that can truly make a difference during emergencies.
-
----
-
-# 🚀 Current Development Status
-
-✅ Emergency System
-✅ Live Location Tracking
-✅ Smart Notifications
-✅ AI Healthcare Assistant
-✅ Driver Tracking System
-🚧 Performance Improvements
-🚧 Advanced AI Features
-
----
-
-# 👨‍💻 Developer
-
-### Developed with ❤️ using Flutter
-
-<p align="center">
-  <b>ResQ Team</b>
-</p>
-
----
-
-<div align="center">
-
-## ⭐ If you like this project, give it a star on GitHub!
-
-</div>
-```
