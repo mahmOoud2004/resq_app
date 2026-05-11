@@ -44,15 +44,41 @@ class NotificationManager {
   Future<void> showTestNotification() async {
     await init();
 
+    final MedicalProfileModel? profile = await _storage.getProfile();
+
+    if (profile == null || profile.diseases.isEmpty) {
+      await _notificationService.plugin.show(
+        id: 999,
+        title: 'ResQ 🚑',
+        body: 'من فضلك اختر حالتك الصحية أولاً',
+        notificationDetails: const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'test_channel',
+            'Test Notifications',
+            channelDescription: 'Testing notifications',
+            importance: Importance.max,
+            priority: Priority.high,
+          ),
+        ),
+      );
+
+      return;
+    }
+
+    final disease =
+        profile.diseases[DateTime.now().millisecond % profile.diseases.length];
+
+    final tip = await DiseaseNotifications.getRandomTip(disease);
+
     await _notificationService.plugin.show(
       id: 999,
-      title: 'ResQ Test 🚑',
-      body: 'هذا إشعار تجريبي من نظام التنبيهات الذكي',
+      title: 'ResQ Health 💙',
+      body: tip,
       notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
-          'test_channel',
-          'Test Notifications',
-          channelDescription: 'Testing notifications',
+          'health_tips_channel',
+          'Health Tips',
+          channelDescription: 'Daily smart health tips',
           importance: Importance.max,
           priority: Priority.high,
         ),

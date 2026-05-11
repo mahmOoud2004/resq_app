@@ -15,23 +15,31 @@ class GoogleCalendarService {
     List<MedicationEntity> medications,
   ) async {
     try {
+      debugPrint("🚀 Starting Google Calendar Sync");
+
       final account = await _googleSignIn.signIn();
 
       if (account == null) {
-        debugPrint("User canceled Google Sign In");
+        debugPrint("❌ User canceled Google Sign In");
         return false;
       }
+
+      debugPrint("✅ Signed in user: ${account.email}");
 
       final authClient = await _googleSignIn.authenticatedClient();
 
       if (authClient == null) {
-        debugPrint("Failed to get authenticated client.");
+        debugPrint("❌ Failed to get authenticated client.");
         return false;
       }
+
+      debugPrint("✅ Authenticated client created");
 
       final calendarApi = calendar.CalendarApi(authClient);
 
       for (var med in medications) {
+        debugPrint("💊 Processing medication: ${med.name}");
+
         final times = ScheduleGeneratorService.generateScheduleTimes(
           med.frequency,
         );
@@ -56,6 +64,8 @@ class GoogleCalendarService {
           }
         }
 
+        debugPrint("📅 Total days: $days");
+
         for (int d = 0; d < days; d++) {
           for (var time in times) {
             final startTime = DateTime(
@@ -66,34 +76,70 @@ class GoogleCalendarService {
               time.minute,
             );
 
-            final endTime = startTime.add(const Duration(minutes: 15));
+            final endTime = startTime.add(
+              const Duration(minutes: 15),
+            );
+
+            debugPrint(
+              "⏰ Creating event at: $startTime",
+            );
 
             final event = calendar.Event(
               summary: "Medication: ${med.name}",
               description: "Dose: ${med.dose}\nFrequency: ${med.frequency}",
-              start: calendar.EventDateTime(dateTime: startTime),
-              end: calendar.EventDateTime(dateTime: endTime),
+              start: calendar.EventDateTime(
+                dateTime: startTime,
+              ),
+              end: calendar.EventDateTime(
+                dateTime: endTime,
+              ),
               reminders: calendar.EventReminders(
                 useDefault: false,
                 overrides: [
-                  calendar.EventReminder(method: "popup", minutes: 10),
+                  calendar.EventReminder(
+                    method: "popup",
+                    minutes: 10,
+                  ),
                 ],
               ),
             );
 
-            await calendarApi.events.insert(event, "primary");
+            await calendarApi.events.insert(
+              event,
+              "primary",
+            );
+
+            debugPrint(
+              "✅ Event inserted successfully",
+            );
           }
         }
       }
 
+      debugPrint("🎉 Calendar Sync Completed");
+
       return true;
-    } catch (e) {
-      debugPrint("Error syncing to Google Calendar: $e");
+    } catch (e, stackTrace) {
+      debugPrint(
+        "❌ Error syncing to Google Calendar: $e",
+      );
+
+      debugPrint(
+        "❌ StackTrace: $stackTrace",
+      );
+
       return false;
     }
   }
 
   static Future<void> signOut() async {
-    await _googleSignIn.signOut();
+    try {
+      await _googleSignIn.signOut();
+
+      debugPrint("✅ Google Sign Out Success");
+    } catch (e, stackTrace) {
+      debugPrint("❌ SignOut Error: $e");
+      debugPrint(stackTrace.toString());
+    }
   }
 }

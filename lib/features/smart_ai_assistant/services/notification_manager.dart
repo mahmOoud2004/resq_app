@@ -34,42 +34,51 @@ class AssistantNotificationManager {
   Future<void> init() async {
     if (_initialized) return;
 
-    tz_data.initializeTimeZones();
+    try {
+      tz_data.initializeTimeZones();
 
-    const AndroidInitializationSettings androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+      tz.setLocalLocation(
+        tz.getLocation('Africa/Cairo'),
+      );
 
-    const DarwinInitializationSettings iosSettings =
-        DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
+      const AndroidInitializationSettings androidSettings =
+          AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    const InitializationSettings initSettings =
-        InitializationSettings(
-      android: androidSettings,
-      iOS: iosSettings,
-    );
+      const DarwinInitializationSettings iosSettings =
+          DarwinInitializationSettings(
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true,
+      );
 
-    await _notificationsPlugin.initialize(
-      settings: initSettings,
-      onDidReceiveNotificationResponse:
-          (NotificationResponse response) async {
-        debugPrint(
-          'Notification clicked: ${response.payload}',
-        );
-      },
-      onDidReceiveBackgroundNotificationResponse:
-          notificationTapBackground,
-    );
+      const InitializationSettings initSettings = InitializationSettings(
+        android: androidSettings,
+        iOS: iosSettings,
+      );
 
-    await _notificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.requestNotificationsPermission();
+      await _notificationsPlugin.initialize(
+        settings: initSettings,
+        onDidReceiveNotificationResponse:
+            (NotificationResponse response) async {
+          debugPrint(
+            'Notification clicked: ${response.payload}',
+          );
+        },
+        onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
+      );
 
-    _initialized = true;
+      await _notificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.requestNotificationsPermission();
+
+      _initialized = true;
+
+      debugPrint("✅ Notification Manager Initialized");
+    } catch (e, stackTrace) {
+      debugPrint("❌ Init Notification Error: $e");
+      debugPrint(stackTrace.toString());
+    }
   }
 
   Future<void> scheduleMedicationReminders(
@@ -77,38 +86,41 @@ class AssistantNotificationManager {
   ) async {
     await init();
 
-    for (var med in medications) {
-      final times =
-          ScheduleGeneratorService.generateScheduleTimes(
-        med.frequency,
-      );
-
-      for (var time in times) {
-        final now = DateTime.now();
-
-        DateTime scheduledDate = DateTime(
-          now.year,
-          now.month,
-          now.day,
-          time.hour,
-          time.minute,
+    try {
+      for (var med in medications) {
+        final times = ScheduleGeneratorService.generateScheduleTimes(
+          med.frequency,
         );
 
-        if (scheduledDate.isBefore(now)) {
-          scheduledDate = scheduledDate.add(
-            const Duration(days: 1),
+        for (var time in times) {
+          final now = DateTime.now();
+
+          DateTime scheduledDate = DateTime(
+            now.year,
+            now.month,
+            now.day,
+            time.hour,
+            time.minute,
+          );
+
+          if (scheduledDate.isBefore(now)) {
+            scheduledDate = scheduledDate.add(
+              const Duration(days: 1),
+            );
+          }
+
+          await _scheduleNotification(
+            id: _notificationIdCounter++,
+            title: '💊 Time for ${med.name}',
+            body: 'Dose: ${med.dose} - ${med.frequency}',
+            scheduledDate: scheduledDate,
+            repeat: true,
           );
         }
-
-        await _scheduleNotification(
-          id: _notificationIdCounter++,
-          title: '💊 Time for ${med.name}',
-          body:
-              'Dose: ${med.dose} - ${med.frequency}',
-          scheduledDate: scheduledDate,
-          repeat: true,
-        );
       }
+    } catch (e, stackTrace) {
+      debugPrint("❌ Schedule Medication Error: $e");
+      debugPrint(stackTrace.toString());
     }
   }
 
@@ -119,46 +131,61 @@ class AssistantNotificationManager {
     required DateTime scheduledDate,
     required bool repeat,
   }) async {
-    const AndroidNotificationDetails androidDetails =
-        AndroidNotificationDetails(
-      'medication_channel',
-      'Medications',
-      channelDescription:
-          'Reminders to take your medication',
-      importance: Importance.max,
-      priority: Priority.high,
-    );
+    try {
+      const AndroidNotificationDetails androidDetails =
+          AndroidNotificationDetails(
+        'medication_channel',
+        'Medications',
+        channelDescription: 'Reminders to take your medication',
+        importance: Importance.max,
+        priority: Priority.high,
+      );
 
-    const DarwinNotificationDetails iosDetails =
-        DarwinNotificationDetails();
+      const DarwinNotificationDetails iosDetails = DarwinNotificationDetails();
 
-    const NotificationDetails notificationDetails =
-        NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
+      const NotificationDetails notificationDetails = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
 
-    await _notificationsPlugin.zonedSchedule(
-      id: id,
-      title: title,
-      body: body,
-      scheduledDate: tz.TZDateTime.from(
-        scheduledDate,
-        tz.local,
-      ),
-      notificationDetails: notificationDetails,
-      androidScheduleMode:
-          AndroidScheduleMode.exactAllowWhileIdle,
-      matchDateTimeComponents:
-          repeat ? DateTimeComponents.time : null,
-    );
+      final tzDate = tz.TZDateTime.from(scheduledDate, tz.local);
 
-    debugPrint(
-      "Scheduled $title for $scheduledDate",
-    );
+      debugPrint(
+        "⏰ Scheduling notification at: $tzDate",
+      );
+
+      await _notificationsPlugin.zonedSchedule(
+        id: id,
+        title: title,
+        body: body,
+        scheduledDate: tzDate,
+        notificationDetails: notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        matchDateTimeComponents: repeat ? DateTimeComponents.time : null,
+      );
+
+      debugPrint(
+        "✅ Scheduled $title for $scheduledDate",
+      );
+    } catch (e, stackTrace) {
+      debugPrint(
+        "❌ Notification Schedule Error: $e",
+      );
+
+      debugPrint(
+        "❌ StackTrace: $stackTrace",
+      );
+    }
   }
 
   Future<void> cancelAll() async {
-    await _notificationsPlugin.cancelAll();
+    try {
+      await _notificationsPlugin.cancelAll();
+
+      debugPrint("✅ All notifications cancelled");
+    } catch (e, stackTrace) {
+      debugPrint("❌ Cancel Notifications Error: $e");
+      debugPrint(stackTrace.toString());
+    }
   }
 }

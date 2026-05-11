@@ -12,7 +12,8 @@ class SmartAssistantMainScreen extends StatefulWidget {
   const SmartAssistantMainScreen({super.key});
 
   @override
-  State<SmartAssistantMainScreen> createState() => _SmartAssistantMainScreenState();
+  State<SmartAssistantMainScreen> createState() =>
+      _SmartAssistantMainScreenState();
 }
 
 class _SmartAssistantMainScreenState extends State<SmartAssistantMainScreen> {
@@ -57,7 +58,8 @@ class _SmartAssistantMainScreenState extends State<SmartAssistantMainScreen> {
             context.push(Routes.smartAssistantResult, extra: state.result);
           } else if (state is SmartAssistantError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+              SnackBar(
+                  content: Text(state.message), backgroundColor: Colors.red),
             );
           }
         },
@@ -113,7 +115,10 @@ class _SmartAssistantMainScreenState extends State<SmartAssistantMainScreen> {
                   ],
                 ),
                 const SizedBox(height: 32),
-                const Center(child: Text("OR", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold))),
+                const Center(
+                    child: Text("OR",
+                        style: TextStyle(
+                            color: Colors.grey, fontWeight: FontWeight.bold))),
                 const SizedBox(height: 32),
                 const Text(
                   "Describe your symptoms / medicines",
@@ -123,9 +128,15 @@ class _SmartAssistantMainScreenState extends State<SmartAssistantMainScreen> {
                 TextField(
                   controller: _textController,
                   maxLines: 6,
+                  style: const TextStyle(
+                    color: Colors.black,
+                  ),
                   decoration: InputDecoration(
-                    hintText: "E.g., I have a headache and fever. I take Panadol 500mg every 8 hours.",
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    hintText:
+                        "E.g., I have a headache and fever. I take Panadol 500mg every 8 hours.",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -136,7 +147,8 @@ class _SmartAssistantMainScreenState extends State<SmartAssistantMainScreen> {
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                   ),
-                  child: const Text("Analyze with AI", style: TextStyle(fontSize: 18)),
+                  child: const Text("Analyze with AI",
+                      style: TextStyle(fontSize: 18)),
                 ),
               ],
             ),
