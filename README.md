@@ -1,64 +1,116 @@
+<div align="center">
+
 # 🚑 ResQ App
 
-ResQ is a smart emergency and health assistance mobile application built with Flutter.
+### Smart Emergency & Healthcare Assistance System
 
-The app focuses on improving emergency response and providing smart healthcare support through real-time features, notifications, and AI-powered assistance.
+<img src="https://img.shields.io/badge/Flutter-3.x-blue?style=for-the-badge&logo=flutter"/>
+<img src="https://img.shields.io/badge/Dart-Language-0175C2?style=for-the-badge&logo=dart"/>
+<img src="https://img.shields.io/badge/Status-In%20Development-success?style=for-the-badge"/>
+<img src="https://img.shields.io/badge/Platform-Android-green?style=for-the-badge"/>
 
 ---
 
-# ✨ Features
+### 💙 Building a smarter emergency response experience
 
-## 🩺 Smart Health Notifications
-- Daily health reminders
-- Disease-based smart tips
-- Personalized medical profile support
-- Scheduled local notifications
+</div>
+
+---
+
+# 📌 Overview
+
+**ResQ** is a modern Flutter-based emergency and healthcare application designed to improve emergency response speed and provide intelligent healthcare support.
+
+The app combines:
+- 🚨 Emergency assistance
+- 🩺 Smart health reminders
+- 📍 Real-time tracking
+- 🤖 AI-powered healthcare support
+- 🔔 Intelligent notifications
+
+into one seamless experience.
+
+---
+
+# ✨ Core Features
 
 ## 🚨 Emergency System
-- Emergency request handling
-- Real-time driver tracking
-- Live location updates
-- Fast emergency response workflow
 
-## 🗺️ Maps & Tracking
+- Send emergency requests instantly
+- Real-time emergency tracking
+- Driver live location updates
+- Fast response workflow
+- Active emergency monitoring
+
+---
+
+## 🩺 Smart Health Notifications
+
+- Personalized daily reminders
+- Disease-based smart notifications
+- Health tips based on medical conditions
+- Scheduled local notifications
+- Smart reminder management
+
+Supported conditions include:
+- Diabetes
+- Hypertension
+- Asthma
+- Heart Disease
+- Epilepsy
+- Kidney Disease
+- Obesity
+- Anemia
+
+---
+
+## 📍 Maps & Live Tracking
+
 - Google Maps integration
-- Live location tracking
-- Driver movement updates
+- Live driver tracking
+- Continuous location updates
 - Route visualization
+- Real-time movement handling
 
-## 🤖 AI Assistance
-- AI-powered medical assistant
+---
+
+## 🤖 AI Medical Assistant
+
+- AI-generated medical insights
 - Prescription analysis
-- Smart health recommendations
+- Smart healthcare recommendations
+- Medical assistance chatbot
+- Health guidance support
 
 ---
 
 # 🛠️ Tech Stack
 
-- Flutter
-- Dart
-- Firebase
-- Google Maps API
-- REST APIs
-- Local Notifications
-- Isar Database
+| Technology | Usage |
+|---|---|
+| Flutter | Mobile App Development |
+| Dart | Programming Language |
+| Firebase | Backend Services |
+| REST APIs | Server Communication |
+| Google Maps API | Maps & Tracking |
+| Isar Database | Local Storage |
+| Flutter Local Notifications | Smart Notifications |
+| Geolocator | Live Location Tracking |
 
 ---
 
-# 📱 Current Progress
-
-✅ Smart notifications system completed  
-✅ Medical profile system completed  
-✅ Real-time tracking implemented  
-✅ Emergency workflow integrated  
-🔄 UI/UX improvements in progress  
-🔄 AI medical features under development  
-
----
-
-# 🚀 Getting Started
-
-## Installation
+# 📂 Project Structure
 
 ```bash
-flutter pub get
+lib/
+│
+├── core/
+├── config/
+├── features/
+│   ├── emergency/
+│   ├── smart_health_notifications/
+│   ├── maps/
+│   ├── ai_assistant/
+│
+├── shared/
+└── main.dart
