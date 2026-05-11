@@ -1,7 +1,10 @@
+import 'package:dio/dio.dart';
 import 'package:resq_app/core/theme/theme_ext.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 import 'package:resq_app/core/constants/app_color.dart';
 import 'package:resq_app/features/emergency/presentation/bloc/emergency_bloc.dart';
 import 'package:resq_app/features/map/presentation/cubit/tracking_cubit.dart';
@@ -13,13 +16,22 @@ class MapScreen extends StatelessWidget {
   final double? lat;
   final double? lng;
 
-  const MapScreen({super.key, this.lat, this.lng});
+  const MapScreen({
+    super.key,
+    this.lat,
+    this.lng,
+  });
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => TrackingCubit(LocationService()),
-      child: _MapScreenBody(lat: lat, lng: lng),
+      create: (_) => TrackingCubit(
+        LocationService(),
+      ),
+      child: _MapScreenBody(
+        lat: lat,
+        lng: lng,
+      ),
     );
   }
 }
@@ -28,7 +40,10 @@ class _MapScreenBody extends StatefulWidget {
   final double? lat;
   final double? lng;
 
-  const _MapScreenBody({this.lat, this.lng});
+  const _MapScreenBody({
+    this.lat,
+    this.lng,
+  });
 
   @override
   State<_MapScreenBody> createState() => _MapScreenBodyState();
@@ -36,18 +51,83 @@ class _MapScreenBody extends StatefulWidget {
 
 class _MapScreenBodyState extends State<_MapScreenBody> {
   GoogleMapController? _mapController;
+
   bool isViewingDriver = false;
+
+  final Dio dio = Dio();
+
+  Set<Marker> hospitalMarkers = {};
+
+  static const String googleApiKey = "AIzaSyAAb4fRMVjSBKfk71ejiHrWdFkHiJ72Nhg";
 
   @override
   void initState() {
     super.initState();
+
     context.read<EmergencyBloc>().add(GetActiveRequestEvent());
   }
 
   @override
   void dispose() {
     _mapController?.dispose();
+
     super.dispose();
+  }
+
+  Future<void> _loadNearbyHospitals(
+    LatLng userLocation,
+  ) async {
+    try {
+      debugPrint("🏥 LOADING NEARBY HOSPITALS");
+
+      final url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
+          "?location=${userLocation.latitude},${userLocation.longitude}"
+          "&radius=5000"
+          "&type=hospital"
+          "&key=$googleApiKey";
+
+      final response = await dio.get(url);
+
+      final results = response.data["results"];
+
+      Set<Marker> hospitals = {};
+
+      for (var hospital in results) {
+        final location = hospital["geometry"]["location"];
+
+        final lat = location["lat"];
+        final lng = location["lng"];
+
+        final name = hospital["name"];
+
+        debugPrint("🏥 HOSPITAL => $name");
+
+        hospitals.add(
+          Marker(
+            markerId: MarkerId(name),
+            position: LatLng(lat, lng),
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              BitmapDescriptor.hueGreen,
+            ),
+            infoWindow: InfoWindow(
+              title: name,
+            ),
+          ),
+        );
+      }
+
+      setState(() {
+        hospitalMarkers = hospitals;
+      });
+
+      debugPrint(
+        "✅ HOSPITALS LOADED => ${hospitals.length}",
+      );
+    } catch (e) {
+      debugPrint(
+        "❌ HOSPITALS ERROR => $e",
+      );
+    }
   }
 
   @override
@@ -60,26 +140,51 @@ class _MapScreenBodyState extends State<_MapScreenBody> {
 
         if (emergencyState is EmergencyHasActiveRequest) {
           driverName = emergencyState.request.driverName;
+
           driverPhone = emergencyState.request.driverPhone;
+
           status = emergencyState.request.status;
 
-          context.read<TrackingCubit>().startTrackingDriver(emergencyState.request.id);
+          context.read<TrackingCubit>().startTrackingDriver(
+                emergencyState.request.id,
+              );
         }
 
         return BlocBuilder<TrackingCubit, TrackingState>(
           builder: (context, trackingState) {
-            return _buildMap(context, trackingState, driverName, driverPhone, status);
+            return _buildMap(
+              context,
+              trackingState,
+              driverName,
+              driverPhone,
+              status,
+            );
           },
         );
       },
     );
   }
 
-  Widget _buildMap(BuildContext context, TrackingState state, String? driverName, String? driverPhone, String? status) {
+  Widget _buildMap(
+    BuildContext context,
+    TrackingState state,
+    String? driverName,
+    String? driverPhone,
+    String? status,
+  ) {
     if (state.isLoading || state.userLocation == null) {
       return Scaffold(
         backgroundColor: context.backgroundColor,
-        body: const Center(child: CircularProgressIndicator()),
+        body: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    /// تحميل المستشفيات مرة واحدة
+    if (hospitalMarkers.isEmpty) {
+      _loadNearbyHospitals(
+        state.userLocation!,
       );
     }
 
@@ -89,23 +194,35 @@ class _MapScreenBodyState extends State<_MapScreenBody> {
       Marker(
         markerId: const MarkerId('user_location'),
         position: state.userLocation!,
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
-        infoWindow: const InfoWindow(title: 'Your Location'),
+        icon: BitmapDescriptor.defaultMarkerWithHue(
+          BitmapDescriptor.hueBlue,
+        ),
+        infoWindow: const InfoWindow(
+          title: 'Your Location',
+        ),
       ),
+      ...hospitalMarkers,
     };
 
+    /// DRIVER MARKER
     if (state.driverLocation != null) {
       markers.add(
         Marker(
           markerId: const MarkerId('driver_location'),
           position: state.driverLocation!,
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-          infoWindow: const InfoWindow(title: 'Ambulance'),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueRed,
+          ),
+          infoWindow: const InfoWindow(
+            title: 'Ambulance',
+          ),
         ),
       );
     }
 
+    /// ROUTE
     Set<Polyline> polylines = {};
+
     if (state.routePoints.isNotEmpty) {
       polylines.add(
         Polyline(
@@ -124,10 +241,14 @@ class _MapScreenBodyState extends State<_MapScreenBody> {
           GoogleMap(
             initialCameraPosition: CameraPosition(
               target: state.userLocation!,
-              zoom: 15,
+              zoom: 14,
             ),
             onMapCreated: (controller) {
               _mapController = controller;
+
+              debugPrint(
+                "🗺 MAP CREATED",
+              );
             },
             markers: markers,
             polylines: polylines,
@@ -135,27 +256,51 @@ class _MapScreenBodyState extends State<_MapScreenBody> {
             myLocationButtonEnabled: false,
             zoomControlsEnabled: false,
           ),
-
           Positioned(
             bottom: 120,
             right: 20,
             child: FloatingActionButton(
-              backgroundColor: isViewingDriver ? AppColors.primary : AppColors.accent,
+              backgroundColor:
+                  isViewingDriver ? AppColors.primary : AppColors.accent,
               onPressed: () {
-                if (state.driverLocation == null) return;
+                if (state.driverLocation == null) {
+                  return;
+                }
+
                 setState(() {
                   isViewingDriver = !isViewingDriver;
                 });
+
                 if (isViewingDriver) {
-                  _mapController?.animateCamera(CameraUpdate.newLatLngZoom(state.driverLocation!, 15));
+                  debugPrint(
+                    "🚑 VIEW DRIVER",
+                  );
+
+                  _mapController?.animateCamera(
+                    CameraUpdate.newLatLngZoom(
+                      state.driverLocation!,
+                      15,
+                    ),
+                  );
                 } else {
-                  _mapController?.animateCamera(CameraUpdate.newLatLngZoom(state.userLocation!, 15));
+                  debugPrint(
+                    "👤 VIEW USER",
+                  );
+
+                  _mapController?.animateCamera(
+                    CameraUpdate.newLatLngZoom(
+                      state.userLocation!,
+                      15,
+                    ),
+                  );
                 }
               },
-              child: Icon(isViewingDriver ? Icons.person : Icons.local_taxi, color: Colors.white),
+              child: Icon(
+                isViewingDriver ? Icons.person : Icons.local_taxi,
+                color: Colors.white,
+              ),
             ),
           ),
-
           if (showDriverCard)
             Positioned(
               bottom: 0,

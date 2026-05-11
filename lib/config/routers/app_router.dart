@@ -36,6 +36,27 @@ import 'package:resq_app/features/emergency/presentation/bloc/emergency_bloc.dar
 import 'route_names.dart';
 import 'package:resq_app/features/smart_health_notifications/presentation/screens/medical_information_screen.dart' as resq_smart_health;
 
+import 'package:resq_app/features/smart_ai_assistant/domain/entities/ai_analysis_result.dart';
+import 'package:resq_app/features/smart_ai_assistant/presentation/cubits/smart_assistant_cubit.dart';
+import 'package:resq_app/features/smart_ai_assistant/data/repositories/smart_assistant_repository_impl.dart';
+import 'package:resq_app/features/smart_ai_assistant/data/datasources/gemini_remote_datasource.dart';
+import 'package:resq_app/features/smart_ai_assistant/data/datasources/ocr_local_datasource.dart';
+import 'package:resq_app/features/smart_ai_assistant/data/datasources/isar_local_datasource.dart';
+import 'package:resq_app/features/smart_ai_assistant/presentation/screens/assistant_main_screen.dart';
+import 'package:resq_app/features/smart_ai_assistant/presentation/screens/assistant_result_screen.dart';
+import 'package:resq_app/features/smart_ai_assistant/presentation/screens/analysis_history_screen.dart';
+
+// DI Setup for Smart Assistant
+SmartAssistantCubit createSmartAssistantCubit() {
+  return SmartAssistantCubit(
+    SmartAssistantRepositoryImpl(
+      geminiRemoteDataSource: GeminiRemoteDataSource(),
+      ocrLocalDataSource: OcrLocalDataSource(),
+      isarLocalDataSource: IsarLocalDataSource(),
+    ),
+  );
+}
+
 const bool skipAuth = false;
 
 final GoRouter appRouter = GoRouter(
@@ -190,6 +211,36 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: "/admin",
       builder: (context, state) => const AdminMainScreen(),
+    ),
+
+    // SMART AI ASSISTANT ROUTES
+    GoRoute(
+      path: Routes.smartAssistantMain,
+      builder: (context, state) {
+        return BlocProvider(
+          create: (context) => createSmartAssistantCubit(),
+          child: const SmartAssistantMainScreen(),
+        );
+      },
+    ),
+    GoRoute(
+      path: Routes.smartAssistantResult,
+      builder: (context, state) {
+        final result = state.extra as AiAnalysisResult;
+        return BlocProvider(
+          create: (context) => createSmartAssistantCubit(),
+          child: SmartAssistantResultScreen(result: result),
+        );
+      },
+    ),
+    GoRoute(
+      path: Routes.analysisHistory,
+      builder: (context, state) {
+        return BlocProvider(
+          create: (context) => createSmartAssistantCubit(),
+          child: const AnalysisHistoryScreen(),
+        );
+      },
     ),
   ],
 );

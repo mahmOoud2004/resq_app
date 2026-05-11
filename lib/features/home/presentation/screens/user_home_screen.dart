@@ -10,6 +10,7 @@ import 'package:resq_app/features/home/presentation/widgets_user/location_card.d
 import 'package:resq_app/features/home/presentation/widgets_user/active_request_card.dart';
 import 'package:resq_app/features/home/presentation/widgets_user/emergency_options_grid.dart';
 import 'package:resq_app/features/map/services/location_service.dart';
+import 'package:resq_app/features/smart_ai_assistant/presentation/widgets/smart_assistant_entry_card.dart';
 
 class UserHomeScreen extends StatefulWidget {
   const UserHomeScreen({super.key});
@@ -113,7 +114,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const HomeHeader(),
-                const SizedBox(height: 20),
+                const SmartAssistantEntryCard(),
+                const SizedBox(height: 8),
 
                 LocationCard(address: address),
                 const SizedBox(height: 20),

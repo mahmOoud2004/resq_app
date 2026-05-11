@@ -15,7 +15,13 @@ class Routes {
   static const terms = '/terms';
 
   /// DRIVER
+  // static const String acount = "/acount";
+  static const String driverRequestDetails = "/driverRequestDetails";
+
+  // Smart Assistant
+  static const String smartAssistantMain = "/smart-assistant";
+  static const String smartAssistantResult = "/smart-assistant-result";
+  static const String analysisHistory = "/analysis-history";
   static const driverHome = '/driverHome';
-  static const driverRequestDetails = '/driverRequestDetails';
   static const driverNavigation = '/driverNavigation';
 }

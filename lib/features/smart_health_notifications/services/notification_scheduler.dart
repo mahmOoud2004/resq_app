@@ -6,7 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'notification_service.dart';
 
 class NotificationScheduler {
-  static final NotificationScheduler _instance = NotificationScheduler._internal();
+  static final NotificationScheduler _instance =
+      NotificationScheduler._internal();
   factory NotificationScheduler() => _instance;
   NotificationScheduler._internal();
 
@@ -48,7 +49,7 @@ class NotificationScheduler {
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
     );
-    
+
     debugPrint("Scheduled notification $id at $hour:$minute");
   }
 
