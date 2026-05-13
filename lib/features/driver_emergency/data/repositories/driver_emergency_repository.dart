@@ -22,4 +22,18 @@ class DriverEmergencyRepository {
   Future<void> completeRequest(int id) async {
     await remote.completeRequest(id);
   }
+
+  Future<DriverRequestModel?> getActiveRequest() async {
+    final data = await remote.getActiveRequest();
+
+    final hasActive = data["has_active_request"] ?? false;
+
+    if (!hasActive) {
+      return null;
+    }
+
+    return DriverRequestModel.fromJson(
+      data["request_details"],
+    );
+  }
 }

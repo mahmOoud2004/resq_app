@@ -25,4 +25,13 @@ class DriverEmergencyRemoteDataSource {
   Future<void> completeRequest(int id) async {
     await dio.post("/emergency/complete/$id");
   }
+
+  /// GET ACTIVE REQUEST
+  Future<Map<String, dynamic>> getActiveRequest() async {
+    final response = await dio.get(
+      "/driver/emergency/active",
+    );
+
+    return response.data;
+  }
 }

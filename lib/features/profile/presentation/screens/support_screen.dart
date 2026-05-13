@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:resq_app/core/theme/theme_ext.dart';
-import 'package:resq_app/core/constants/app_color.dart';
 import '../widgets/profile_item_card.dart';
 
 class SupportScreen extends StatelessWidget {
@@ -18,7 +17,6 @@ class SupportScreen extends StatelessWidget {
           style: TextStyle(color: Colors.white),
         ),
       ),
-
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -29,27 +27,21 @@ class SupportScreen extends StatelessWidget {
               subtitle: "Find answers to common questions",
               onTap: () {},
             ),
-
             const SizedBox(height: 16),
-
             ProfileItemCard(
               icon: Icons.support_agent,
               title: "Contact Support",
               subtitle: "Reach out to our support team",
               onTap: () {},
             ),
-
             const SizedBox(height: 16),
-
             ProfileItemCard(
               icon: Icons.bug_report,
               title: "Report a Problem",
               subtitle: "Tell us if something went wrong",
               onTap: () {},
             ),
-
             const SizedBox(height: 16),
-
             ProfileItemCard(
               icon: Icons.info_outline,
               title: "About ResQ",

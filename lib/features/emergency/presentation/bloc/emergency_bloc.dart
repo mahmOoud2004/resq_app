@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:dio/dio.dart';
 import 'package:resq_app/core/network/api_constants.dart';
 import 'package:resq_app/core/network/dio_client.dart';
 import 'package:resq_app/features/emergency/data/model/active_request_mode.dart';

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:resq_app/core/theme/theme_ext.dart';
-import 'package:resq_app/core/constants/app_color.dart';
 
 class EmergencyOptionsGrid extends StatelessWidget {
   final List<String> selected;
@@ -83,15 +82,12 @@ class EmergencyOptionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => onTap(service),
-
       child: AnimatedScale(
         duration: const Duration(milliseconds: 200),
         scale: selected ? 1.05 : 1,
-
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           padding: const EdgeInsets.all(18),
-
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
 
@@ -120,7 +116,6 @@ class EmergencyOptionCard extends StatelessWidget {
                 ),
             ],
           ),
-
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -132,9 +127,7 @@ class EmergencyOptionCard extends StatelessWidget {
                 ),
                 child: Icon(icon, color: Colors.white, size: 26),
               ),
-
               const SizedBox(height: 14),
-
               Text(
                 title,
                 style: const TextStyle(

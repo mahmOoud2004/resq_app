@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:resq_app/core/constants/app_color.dart';
-import 'package:resq_app/core/theme/theme_ext.dart';
 import 'package:resq_app/config/routers/route_names.dart';
 
 class SmartAssistantEntryCard extends StatelessWidget {

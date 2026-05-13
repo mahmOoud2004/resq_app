@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:resq_app/features/navigation/presentation/screen/driver_main_screens.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:resq_app/config/routers/route_names.dart';
@@ -84,16 +83,19 @@ class _AuthGateScreenState extends State<AuthGateScreen> {
         debugPrint("👤 OPEN USER HOME");
         _checkMedicalProfileAndNavigate();
       }
+
       /// DRIVER
       else if (normalizedRole == "driver") {
         debugPrint("🚑 OPEN DRIVER HOME");
         context.go("/driver-main");
       }
+
       /// ADMIN
       else if (normalizedRole == "admin") {
         debugPrint("🛠 OPEN ADMIN PANEL");
         context.go("/admin");
       }
+
       /// fallback
       else {
         debugPrint("⚠️ UNKNOWN ROLE -> LOGIN");
@@ -107,9 +109,9 @@ class _AuthGateScreenState extends State<AuthGateScreen> {
     // Assuming we use SharedPreferences key 'medical_profile_data'
     // as defined in MedicalProfileStorage
     final hasMedicalProfile = prefs.containsKey('medical_profile_data');
-    
+
     if (!mounted) return;
-    
+
     if (!hasMedicalProfile) {
       debugPrint("🩺 FIRST TIME: OPEN MEDICAL INFO");
       context.go(Routes.medicalInfo);

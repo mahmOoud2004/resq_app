@@ -4,11 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:resq_app/core/constants/app_color.dart';
 
 import 'package:resq_app/features/home/presentation/screens/driver_home_screen.dart';
+import 'package:resq_app/features/home/presentation/widgets_driver/driver_active_trip_screen.dart';
 import 'package:resq_app/features/profile/presentation/screens/profile_screen.dart';
 
 import 'package:resq_app/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:resq_app/features/profile/presentation/bloc/profile_event.dart';
-
 import 'package:resq_app/features/profile/data/datasources/profile_remote_datasource.dart';
 import 'package:resq_app/features/profile/data/repositories/profile_repository_impl.dart';
 
@@ -24,6 +24,7 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
 
   final List<Widget> screens = [
     const DriverHomeScreen(),
+    const DriverActiveTripScreen(),
     // const MapScreen(),
     // const ChatbotPage(),
     const ProfileScreen(),
@@ -57,6 +58,11 @@ class _DriverMainScreenState extends State<DriverMainScreen> {
             //   icon: Icon(Icons.chat_bubble),
             //   label: "Chatbot",
             // ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.local_hospital),
+              label: "Emergency",
+            ),
+
             BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
           ],
         ),

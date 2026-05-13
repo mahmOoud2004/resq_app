@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:resq_app/core/theme/theme_ext.dart';
-import 'package:resq_app/core/constants/app_color.dart';
 import '../widgets/profile_item_card.dart';
 
 class TermsScreen extends StatelessWidget {
@@ -18,7 +17,6 @@ class TermsScreen extends StatelessWidget {
           style: TextStyle(color: Colors.white),
         ),
       ),
-
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -29,18 +27,14 @@ class TermsScreen extends StatelessWidget {
               subtitle: "How we protect your data",
               onTap: () {},
             ),
-
             const SizedBox(height: 16),
-
             ProfileItemCard(
               icon: Icons.description_outlined,
               title: "Terms of Service",
               subtitle: "Rules for using the application",
               onTap: () {},
             ),
-
             const SizedBox(height: 16),
-
             ProfileItemCard(
               icon: Icons.security,
               title: "Data Usage",

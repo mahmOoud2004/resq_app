@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:resq_app/features/admin/presentation/screens/admin_dashboard_screen.dart';
 
 import 'package:resq_app/features/auth/presentation/screens/forget_password_screen.dart';
 import 'package:resq_app/features/auth/presentation/screens/login.dart';
@@ -34,7 +33,8 @@ import 'package:resq_app/features/emergency/data/repositories/emergency_reposito
 import 'package:resq_app/features/emergency/presentation/bloc/emergency_bloc.dart';
 
 import 'route_names.dart';
-import 'package:resq_app/features/smart_health_notifications/presentation/screens/medical_information_screen.dart' as resq_smart_health;
+import 'package:resq_app/features/smart_health_notifications/presentation/screens/medical_information_screen.dart'
+    as resq_smart_health;
 
 import 'package:resq_app/features/smart_ai_assistant/domain/entities/ai_analysis_result.dart';
 import 'package:resq_app/features/smart_ai_assistant/presentation/cubits/smart_assistant_cubit.dart';
@@ -61,7 +61,6 @@ const bool skipAuth = false;
 
 final GoRouter appRouter = GoRouter(
   initialLocation: skipAuth ? Routes.driverHome : "/auth-gate",
-
   routes: [
     /// SPLASH
     GoRoute(
@@ -162,7 +161,8 @@ final GoRouter appRouter = GoRouter(
     /// MEDICAL INFO (ONBOARDING)
     GoRoute(
       path: Routes.medicalInfo,
-      builder: (context, state) => const resq_smart_health.MedicalInformationScreen(),
+      builder: (context, state) =>
+          const resq_smart_health.MedicalInformationScreen(),
     ),
 
     /// DRIVER HOME

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:resq_app/core/theme/theme_ext.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:resq_app/core/constants/app_color.dart';
 
 import 'package:resq_app/features/driver_emergency/presentation/cubit/driver_emergency_cubit.dart';
 

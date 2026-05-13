@@ -1,12 +1,13 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:resq_app/core/network/dio_client.dart';
+
+import 'package:resq_app/features/navigation/presentation/screen/driver_main_screens.dart';
 
 class DriverMapScreen extends StatefulWidget {
   final double userLat;
@@ -227,59 +228,84 @@ class _DriverMapScreenState extends State<DriverMapScreen> {
       widget.userLng,
     );
 
-    return GoogleMap(
-      initialCameraPosition: CameraPosition(
-        target: userLocation,
-        zoom: 15,
-      ),
-      onMapCreated: (controller) {
-        mapController = controller;
-
-        debugPrint("🗺 DRIVER MAP CREATED");
-      },
-      markers: {
-        /// USER
-        Marker(
-          markerId: const MarkerId("user_location"),
-          position: userLocation,
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-            BitmapDescriptor.hueBlue,
-          ),
-          infoWindow: const InfoWindow(
-            title: "User Location",
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          "Emergency Map",
         ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const DriverMainScreen(),
+              ),
+              (route) => false,
+            );
+          },
+        ),
+      ),
+      body: GoogleMap(
+        initialCameraPosition: CameraPosition(
+          target: userLocation,
+          zoom: 15,
+        ),
+        onMapCreated: (controller) {
+          mapController = controller;
 
-        /// DRIVER
-        if (driverLocation != null)
+          debugPrint(
+            "🗺 DRIVER MAP CREATED",
+          );
+        },
+        markers: {
+          /// USER
           Marker(
             markerId: const MarkerId(
-              "driver_location",
+              "user_location",
             ),
-            position: driverLocation!,
+            position: userLocation,
             icon: BitmapDescriptor.defaultMarkerWithHue(
-              BitmapDescriptor.hueRed,
+              BitmapDescriptor.hueBlue,
             ),
             infoWindow: const InfoWindow(
-              title: "Driver",
+              title: "User Location",
             ),
           ),
-      },
-      polylines: {
-        if (driverLocation != null)
-          Polyline(
-            polylineId: const PolylineId("route"),
-            points: [
-              driverLocation!,
-              userLocation,
-            ],
-            width: 5,
-            color: Colors.blue,
-          ),
-      },
-      myLocationEnabled: true,
-      myLocationButtonEnabled: true,
-      zoomControlsEnabled: false,
+
+          /// DRIVER
+          if (driverLocation != null)
+            Marker(
+              markerId: const MarkerId(
+                "driver_location",
+              ),
+              position: driverLocation!,
+              icon: BitmapDescriptor.defaultMarkerWithHue(
+                BitmapDescriptor.hueRed,
+              ),
+              infoWindow: const InfoWindow(
+                title: "Driver",
+              ),
+            ),
+        },
+        polylines: {
+          if (driverLocation != null)
+            Polyline(
+              polylineId: const PolylineId(
+                "route",
+              ),
+              points: [
+                driverLocation!,
+                userLocation,
+              ],
+              width: 5,
+              color: Colors.blue,
+            ),
+        },
+        myLocationEnabled: true,
+        myLocationButtonEnabled: true,
+        zoomControlsEnabled: false,
+      ),
     );
   }
 }

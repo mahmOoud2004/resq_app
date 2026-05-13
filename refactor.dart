@@ -1,4 +1,3 @@
-
 // Test refactor script
 import 'dart:io';
 
@@ -18,9 +17,9 @@ void main() async {
   await for (var entity in libDir.list(recursive: true)) {
     if (entity is File && entity.path.endsWith('.dart')) {
       final fileName = entity.path.split(Platform.pathSeparator).last;
-      if (fileName == 'app_color.dart' || 
-          fileName == 'app_theme.dart' || 
-          fileName == 'theme_ext.dart' || 
+      if (fileName == 'app_color.dart' ||
+          fileName == 'app_theme.dart' ||
+          fileName == 'theme_ext.dart' ||
           fileName == 'refactor.dart' ||
           fileName == 'main.dart') {
         continue;
@@ -28,7 +27,7 @@ void main() async {
 
       String content = await entity.readAsString();
       bool hasChanges = false;
-      
+
       replacements.forEach((oldStr, newStr) {
         if (content.contains(oldStr)) {
           content = content.replaceAll(oldStr, newStr);
@@ -41,9 +40,11 @@ void main() async {
           final importRegex = RegExp(r'import\s+.*?;\n');
           final match = importRegex.firstMatch(content);
           if (match != null) {
-            content = content.replaceRange(match.end, match.end, "import 'package:resq_app/core/theme/theme_ext.dart';\n");
+            content = content.replaceRange(match.end, match.end,
+                "import 'package:resq_app/core/theme/theme_ext.dart';\n");
           } else {
-            content = "import 'package:resq_app/core/theme/theme_ext.dart';\n" + content;
+            content =
+                "import 'package:resq_app/core/theme/theme_ext.dart';\n$content";
           }
         }
         await entity.writeAsString(content);
