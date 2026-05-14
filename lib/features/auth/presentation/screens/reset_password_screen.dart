@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:resq_app/config/routers/route_names.dart';
 import 'package:resq_app/core/constants/app_color.dart';
+import 'package:resq_app/core/error/error_handler.dart';
 import 'package:resq_app/core/storage/token_storage.dart';
 import 'package:resq_app/features/auth/data/datasource/auth_remote_datasource.dart';
 import 'package:resq_app/features/auth/data/repositories/auth_repository.dart';
@@ -61,8 +62,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       _showMsg("Password reset successful");
 
       context.go(Routes.login);
-    } catch (e) {
-      _showMsg(e.toString());
+    } catch (error, stackTrace) {
+      final appException = ErrorHandler.handle(error, stackTrace: stackTrace);
+      _showMsg(appException.userMessage);
     }
 
     setState(() {

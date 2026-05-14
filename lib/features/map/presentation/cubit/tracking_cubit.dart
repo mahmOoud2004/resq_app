@@ -1,25 +1,24 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
+import 'package:resq_app/core/error/app_logger.dart';
+import 'package:resq_app/core/error/error_handler.dart';
 import 'package:resq_app/core/network/dio_client.dart';
 import 'package:resq_app/features/map/presentation/cubit/tracking_state.dart';
 import 'package:resq_app/features/map/services/location_service.dart';
 
 class TrackingCubit extends Cubit<TrackingState> {
   final LocationService _locationService;
-
   final dio = DioClient().dio;
 
   StreamSubscription<Position>? _locationSubscription;
-
   Timer? _driverTimer;
   Timer? _routeTimer;
-
   int? currentRequestId;
+  bool _fetchingDriverLocation = false;
+  bool _fetchingRoute = false;
 
   TrackingCubit(this._locationService) : super(const TrackingState()) {
     _initUserLocation();
@@ -27,64 +26,53 @@ class TrackingCubit extends Cubit<TrackingState> {
 
   Future<void> _initUserLocation() async {
     try {
-      debugPrint("📍 Getting user location...");
-
       final position = await _locationService.getCurrentLocation();
-
-      final userLocation = LatLng(
-        position.latitude,
-        position.longitude,
-      );
-
-      debugPrint(
-        "✅ USER LOCATION => "
-        "${userLocation.latitude}, "
-        "${userLocation.longitude}",
-      );
+      final userLocation = LatLng(position.latitude, position.longitude);
 
       emit(
         state.copyWith(
           userLocation: userLocation,
           isLoading: false,
+          error: null,
         ),
       );
 
       _locationSubscription = _locationService.getLocationStream().listen(
         (position) {
-          final updatedLocation = LatLng(
-            position.latitude,
-            position.longitude,
-          );
-
-          debugPrint(
-            "🔄 USER LOCATION UPDATED => "
-            "${updatedLocation.latitude}, "
-            "${updatedLocation.longitude}",
-          );
-
           emit(
             state.copyWith(
-              userLocation: updatedLocation,
+              userLocation: LatLng(position.latitude, position.longitude),
+              error: null,
             ),
           );
         },
-        onError: (e) {
-          debugPrint("❌ LOCATION STREAM ERROR => $e");
-
+        onError: (error, stackTrace) {
+          final appException = ErrorHandler.handle(error);
+          AppLogger.error(
+            'Location stream failed.',
+            name: 'TrackingCubit',
+            error: error,
+            stackTrace: stackTrace is StackTrace ? stackTrace : null,
+          );
           emit(
             state.copyWith(
-              error: "Location stream error",
+              error: appException.userMessage,
             ),
           );
         },
       );
-    } catch (e) {
-      debugPrint("❌ INIT LOCATION ERROR => $e");
-
+    } catch (error, stackTrace) {
+      final appException = ErrorHandler.handle(error, stackTrace: stackTrace);
+      AppLogger.error(
+        'Initial location fetch failed.',
+        name: 'TrackingCubit',
+        error: error,
+        stackTrace: stackTrace,
+      );
       emit(
         state.copyWith(
           isLoading: false,
-          error: "Location error",
+          error: appException.userMessage,
         ),
       );
     }
@@ -93,90 +81,80 @@ class TrackingCubit extends Cubit<TrackingState> {
   void startTrackingDriver(int requestId) {
     if (currentRequestId == requestId) return;
 
-    debugPrint("🚑 START TRACKING DRIVER => $requestId");
-
     currentRequestId = requestId;
-
     _driverTimer?.cancel();
     _routeTimer?.cancel();
 
-    _fetchDriverLocation();
-    _fetchRouteAndEta();
+    unawaited(_fetchDriverLocation());
+    unawaited(_fetchRouteAndEta());
 
-    /// Driver location update
     _driverTimer = Timer.periodic(
       const Duration(seconds: 8),
-      (_) => _fetchDriverLocation(),
+      (_) => unawaited(_fetchDriverLocation()),
     );
 
-    /// Route update
     _routeTimer = Timer.periodic(
       const Duration(seconds: 20),
-      (_) => _fetchRouteAndEta(),
+      (_) => unawaited(_fetchRouteAndEta()),
     );
   }
 
   Future<void> _fetchDriverLocation() async {
-    if (currentRequestId == null) return;
+    if (currentRequestId == null || _fetchingDriverLocation) return;
+    _fetchingDriverLocation = true;
 
     try {
-      debugPrint(
-        "🚑 FETCH DRIVER LOCATION => $currentRequestId",
-      );
+      final response = await dio.get("/emergency/track-driver/$currentRequestId");
+      final data = response.data;
+      if (data is! Map<String, dynamic>) {
+        throw const FormatException('Track driver response is invalid.');
+      }
 
-      final response = await dio.get(
-        "/emergency/track-driver/$currentRequestId",
-      );
-
-      final driver = response.data["driver_location"];
-
-      if (driver == null) {
-        debugPrint("⚠️ DRIVER LOCATION IS NULL");
+      final driver = data["driver_location"];
+      if (driver is! Map<String, dynamic>) {
         return;
       }
 
-      double lat = double.parse(driver["lat"]);
-      double lng = double.parse(driver["lng"]);
+      double lat = double.tryParse(driver["lat"].toString()) ?? 0;
+      double lng = double.tryParse(driver["lng"].toString()) ?? 0;
 
-      /// 🔥 حل مشكلة نفس المكان
-      if (state.userLocation != null) {
-        if (lat == state.userLocation!.latitude &&
-            lng == state.userLocation!.longitude) {
-          debugPrint(
-            "⚠️ DRIVER & USER SAME LOCATION => APPLYING OFFSET",
-          );
-
-          lat += 0.0007;
-          lng += 0.0007;
-        }
+      if (state.userLocation != null &&
+          lat == state.userLocation!.latitude &&
+          lng == state.userLocation!.longitude) {
+        lat += 0.0007;
+        lng += 0.0007;
       }
-
-      final driverLocation = LatLng(lat, lng);
-
-      debugPrint(
-        "🚑 DRIVER LOCATION => "
-        "${driverLocation.latitude}, "
-        "${driverLocation.longitude}",
-      );
 
       emit(
         state.copyWith(
-          driverLocation: driverLocation,
+          driverLocation: LatLng(lat, lng),
+          error: null,
         ),
       );
-    } catch (e) {
-      debugPrint("❌ DRIVER TRACK ERROR => $e");
+    } catch (error, stackTrace) {
+      final appException = ErrorHandler.handle(error, stackTrace: stackTrace);
+      AppLogger.error(
+        'Driver tracking failed.',
+        name: 'TrackingCubit',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      emit(state.copyWith(error: appException.userMessage));
+    } finally {
+      _fetchingDriverLocation = false;
     }
   }
 
   Future<void> _fetchRouteAndEta() async {
-    if (state.driverLocation == null || state.userLocation == null) {
+    if (state.driverLocation == null ||
+        state.userLocation == null ||
+        _fetchingRoute) {
       return;
     }
 
-    try {
-      debugPrint("🛣 FETCH ROUTE & ETA");
+    _fetchingRoute = true;
 
+    try {
       final routeData = await _locationService.getRouteData(
         state.driverLocation!.latitude,
         state.driverLocation!.longitude,
@@ -185,34 +163,33 @@ class TrackingCubit extends Cubit<TrackingState> {
       );
 
       if (routeData != null) {
-        debugPrint(
-          "✅ ETA => ${routeData.eta}",
-        );
-
-        debugPrint(
-          "✅ ROUTE POINTS => ${routeData.points.length}",
-        );
-
         emit(
           state.copyWith(
             eta: routeData.eta,
             routePoints: routeData.points,
+            error: null,
           ),
         );
       }
-    } catch (e) {
-      debugPrint("❌ ROUTE ERROR => $e");
+    } catch (error, stackTrace) {
+      final appException = ErrorHandler.handle(error, stackTrace: stackTrace);
+      AppLogger.error(
+        'Route fetch failed.',
+        name: 'TrackingCubit',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      emit(state.copyWith(error: appException.userMessage));
+    } finally {
+      _fetchingRoute = false;
     }
   }
 
   @override
   Future<void> close() {
-    debugPrint("🛑 TRACKING CUBIT CLOSED");
-
     _locationSubscription?.cancel();
     _driverTimer?.cancel();
     _routeTimer?.cancel();
-
     return super.close();
   }
 }

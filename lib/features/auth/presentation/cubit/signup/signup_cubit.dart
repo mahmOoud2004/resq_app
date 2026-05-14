@@ -1,8 +1,12 @@
 import 'dart:io';
-import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:dio/dio.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:resq_app/core/error/app_logger.dart';
+import 'package:resq_app/core/error/error_handler.dart';
 import 'package:resq_app/core/network/api_constants.dart';
 import 'package:resq_app/core/network/dio_client.dart';
+
 import 'signup_state.dart';
 
 class SignupCubit extends Cubit<SignupState> {
@@ -23,29 +27,32 @@ class SignupCubit extends Cubit<SignupState> {
     emit(SignupLoading());
 
     try {
-      FormData formData = FormData.fromMap({
-        "first_name": firstName,
-        "last_name": lastName,
-        "email": email,
-        "phone": phone,
-        "id_number": idNumber,
+      final formData = FormData.fromMap({
+        "first_name": firstName.trim(),
+        "last_name": lastName.trim(),
+        "email": email.trim(),
+        "phone": phone.trim(),
+        "id_number": idNumber.trim(),
         "password": password,
         "password_confirmation": password,
-        "role": role,
+        "role": role.trim(),
         "personal_id_image": await MultipartFile.fromFile(
           idImage.path,
           filename: "id.jpg",
         ),
       });
 
-      final response = await dio.post(ApiConstants.register, data: formData);
-
-      print("REGISTER RESPONSE: ${response.data}");
-
+      await dio.post(ApiConstants.register, data: formData);
       emit(SignupSuccess());
-    } catch (e) {
-      print("REGISTER ERROR: $e");
-      emit(SignupError(e.toString()));
+    } catch (error, stackTrace) {
+      final appException = ErrorHandler.handle(error, stackTrace: stackTrace);
+      AppLogger.error(
+        'Registration failed.',
+        name: 'SignupCubit',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      emit(SignupError(appException.userMessage));
     }
   }
 }

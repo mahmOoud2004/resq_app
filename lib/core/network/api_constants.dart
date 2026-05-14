@@ -1,6 +1,8 @@
 class ApiConstants {
   static const String baseUrl =
       "https://feelinglessly-preocular-xochitl.ngrok-free.dev/api";
+  static const String storageBaseUrl =
+      "https://feelinglessly-preocular-xochitl.ngrok-free.dev/storage/";
 
   static const String login = "/login";
   static const String register = "/register";
@@ -23,4 +25,6 @@ class ApiConstants {
   static const String cancelEmergency = "/admin/cancel-emergency";
 
   static const String getActiveRequest = "/emergency/active";
+
+  static const String googleMapsApiKeyEnv = "GOOGLE_MAPS_API_KEY";
 }

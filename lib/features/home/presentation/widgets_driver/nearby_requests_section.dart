@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:resq_app/core/theme/theme_ext.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:resq_app/core/constants/app_color.dart';
+import 'package:resq_app/core/theme/theme_ext.dart';
 
 import 'package:resq_app/features/driver_emergency/presentation/cubit/driver_emergency_cubit.dart';
 import 'package:resq_app/features/driver_emergency/presentation/cubit/driver_emergency_state.dart';
@@ -25,12 +25,20 @@ class NearbyRequestsSection extends StatelessWidget {
               color: Colors.white,
             ),
           ),
-
           const SizedBox(height: 16),
-
           Expanded(
             child: BlocBuilder<DriverEmergencyCubit, DriverEmergencyState>(
               builder: (context, state) {
+                if (!state.isOnline) {
+                  return Center(
+                    child: Text(
+                      "You are offline.\nTurn on Driver Status to receive requests.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: context.textSecondaryColor),
+                    ),
+                  );
+                }
+
                 if (state is DriverEmergencyLoading) {
                   return const Center(child: CircularProgressIndicator());
                 }
@@ -51,7 +59,7 @@ class NearbyRequestsSection extends StatelessWidget {
                       final request = state.requests[index];
 
                       return RequestCard(
-                        request: request, // 🔥 object كامل
+                        request: request,
                         title: request.serviceType,
                         distance: "${request.latitude}, ${request.longitude}",
                         location: "Emergency Location",
@@ -61,10 +69,11 @@ class NearbyRequestsSection extends StatelessWidget {
                 }
 
                 if (state is DriverEmergencyError) {
-                  return const Center(
+                  return Center(
                     child: Text(
-                      "Failed to load requests",
-                      style: TextStyle(color: AppColors.danger),
+                      state.message ?? "Failed to load requests",
+                      style: const TextStyle(color: AppColors.danger),
+                      textAlign: TextAlign.center,
                     ),
                   );
                 }

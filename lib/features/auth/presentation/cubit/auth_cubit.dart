@@ -1,4 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:resq_app/core/error/app_logger.dart';
+import 'package:resq_app/core/error/error_handler.dart';
+
 import '../../../../core/storage/token_storage.dart';
 import '../../data/repositories/auth_repository.dart';
 import 'auth_state.dart';
@@ -17,27 +20,27 @@ class AuthCubit extends Cubit<AuthState> {
     emit(AuthLoading());
 
     try {
-      /// تسجيل الدخول
       await repository.login(
         phone: phone,
         idNumber: idNumber,
         password: password,
       );
 
-      /// نقرأ التوكن بعد الحفظ
       final token = await tokenStorage.getToken();
-
-      ///  لو فيه token → دخول مباشر
       if (token != null && token.isNotEmpty) {
         emit(AuthSuccess());
-      }
-      ///  لو مفيش token → محتاج OTP
-      else {
+      } else {
         emit(AuthNeedsOtp(phone));
       }
-    } catch (e) {
-      print("🔥 LOGIN ERROR: $e");
-      emit(AuthError(e.toString()));
+    } catch (error, stackTrace) {
+      final appException = ErrorHandler.handle(error, stackTrace: stackTrace);
+      AppLogger.error(
+        'Login flow failed.',
+        name: 'AuthCubit',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      emit(AuthError(appException.userMessage));
     }
   }
 
@@ -46,10 +49,16 @@ class AuthCubit extends Cubit<AuthState> {
 
     try {
       await repository.forgotPassword(email);
-
       emit(AuthNeedsOtp(email));
-    } catch (e) {
-      emit(AuthError(e.toString()));
+    } catch (error, stackTrace) {
+      final appException = ErrorHandler.handle(error, stackTrace: stackTrace);
+      AppLogger.error(
+        'Forgot password flow failed.',
+        name: 'AuthCubit',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      emit(AuthError(appException.userMessage));
     }
   }
 }

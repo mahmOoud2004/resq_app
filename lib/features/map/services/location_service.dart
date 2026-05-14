@@ -1,16 +1,24 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:resq_app/core/error/app_exception.dart';
+import 'package:resq_app/core/error/app_logger.dart';
+import 'package:resq_app/core/error/error_handler.dart';
+import 'package:resq_app/core/network/api_constants.dart';
 
 class LocationService {
   Future<Position> getCurrentLocation() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
 
     if (!serviceEnabled) {
-      await Geolocator.openLocationSettings();
-      throw Exception("Location services are disabled");
+      throw const AppException(
+        code: 'location_services_disabled',
+        userMessage: 'Location services are turned off. Please enable them and try again.',
+        developerMessage: 'Location services are disabled.',
+      );
     }
 
     LocationPermission permission = await Geolocator.checkPermission();
@@ -20,16 +28,25 @@ class LocationService {
     }
 
     if (permission == LocationPermission.denied) {
-      throw Exception("Location permission denied");
+      throw const AppException(
+        code: 'location_permission_denied',
+        userMessage: 'Location permission is required to continue.',
+        developerMessage: 'Location permission denied by user.',
+      );
     }
 
     if (permission == LocationPermission.deniedForever) {
-      throw Exception("Location permanently denied");
+      throw const AppException(
+        code: 'location_permission_denied_forever',
+        userMessage:
+            'Location permission was permanently denied. Please enable it from settings.',
+        developerMessage: 'Location permission denied forever.',
+      );
     }
 
-    return await Geolocator.getCurrentPosition(
+    return Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
-    );
+    ).timeout(const Duration(seconds: 20));
   }
 
   Stream<Position> getLocationStream() {
@@ -42,17 +59,33 @@ class LocationService {
   }
 
   Future<String> getAddressFromLatLng(double lat, double lng) async {
-    List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
+    try {
+      final placemarks = await placemarkFromCoordinates(
+        lat,
+        lng,
+      ).timeout(const Duration(seconds: 10));
 
-    Placemark place = placemarks.first;
+      if (placemarks.isEmpty) {
+        return 'Current location';
+      }
 
-    String city = place.locality ?? "";
-    String area = place.subLocality ?? "";
+      final place = placemarks.first;
+      final city = place.locality?.trim() ?? '';
+      final area = place.subLocality?.trim() ?? '';
+      final address = [city, area].where((value) => value.isNotEmpty).join(' - ');
 
-    return "$city - $area";
+      return address.isEmpty ? 'Current location' : address;
+    } catch (error, stackTrace) {
+      final appException = ErrorHandler.handle(error);
+      AppLogger.warning(
+        appException.developerMessage,
+        name: 'LocationService',
+        error: error,
+      );
+      AppLogger.debug(stackTrace.toString(), name: 'LocationService');
+      return 'Current location';
+    }
   }
-
-  static const String _googleApiKey = "AIzaSyAAb4fRMVjSBKfk71ejiHrWdFkHiJ72Nhg";
 
   Future<RouteData?> getRouteData(
     double startLat,
@@ -61,13 +94,27 @@ class LocationService {
     double endLng,
   ) async {
     try {
+      final apiKey = dotenv.env[ApiConstants.googleMapsApiKeyEnv]?.trim();
+      if (apiKey == null || apiKey.isEmpty) {
+        AppLogger.warning(
+          'Google Maps API key is missing. Skipping route fetch.',
+          name: 'LocationService',
+        );
+        return null;
+      }
+
       final url =
           "https://maps.googleapis.com/maps/api/directions/json?"
           "origin=$startLat,$startLng"
           "&destination=$endLat,$endLng"
-          "&key=$_googleApiKey";
+          "&key=$apiKey";
 
-      final response = await Dio().get(url);
+      final response = await Dio(
+        BaseOptions(
+          connectTimeout: const Duration(seconds: 15),
+          receiveTimeout: const Duration(seconds: 15),
+        ),
+      ).get(url);
 
       if (response.statusCode == 200 &&
           response.data['routes'] != null &&
@@ -84,8 +131,6 @@ class LocationService {
 
         if (route['overview_polyline'] != null &&
             route['overview_polyline']['points'] != null) {
-          PolylinePoints polylinePoints = PolylinePoints(apiKey: _googleApiKey);
-
           List<PointLatLng> result = PolylinePoints.decodePolyline(
             route['overview_polyline']['points'],
           );
@@ -95,8 +140,14 @@ class LocationService {
 
         return RouteData(eta: eta, points: points);
       }
-    } catch (e) {
-      // ignore errors
+    } catch (error, stackTrace) {
+      final appException = ErrorHandler.handle(error);
+      AppLogger.warning(
+        appException.developerMessage,
+        name: 'LocationService',
+        error: error,
+      );
+      AppLogger.debug(stackTrace.toString(), name: 'LocationService');
     }
 
     return null;

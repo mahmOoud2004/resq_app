@@ -10,6 +10,7 @@ import 'package:resq_app/features/auth/data/datasource/auth_remote_datasource.da
 import 'package:resq_app/features/auth/data/repositories/auth_repository.dart';
 import 'package:resq_app/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:resq_app/features/auth/presentation/cubit/auth_state.dart';
+import 'package:resq_app/features/auth/presentation/cubit/otp/otp_purpose.dart';
 import 'package:resq_app/features/auth/presentation/widgets/build_puttom.dart';
 import 'package:resq_app/features/auth/presentation/widgets/build_text_field.dart';
 import 'package:resq_app/features/auth/presentation/widgets/firsraid_screen.dart';
@@ -66,7 +67,13 @@ class _LoginScreenState extends State<LoginScreen> {
           }
 
           if (state is AuthNeedsOtp) {
-            context.go(Routes.otp, extra: state.email);
+            context.go(
+              Routes.otp,
+              extra: {
+                "email": state.email,
+                "purpose": OtpPurpose.signup,
+              },
+            );
           }
 
           if (state is AuthError) {

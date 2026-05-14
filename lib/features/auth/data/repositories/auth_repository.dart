@@ -1,5 +1,5 @@
-import '../datasource/auth_remote_datasource.dart';
 import '../../../../core/storage/token_storage.dart';
+import '../datasource/auth_remote_datasource.dart';
 
 class AuthRepository {
   final AuthRemoteDataSource remote;
@@ -18,7 +18,12 @@ class AuthRepository {
       password: password,
     );
 
-    await storage.saveToken(result.token?.toString() ?? '');
+    final token = result.token?.trim();
+    if (token != null && token.isNotEmpty) {
+      await storage.saveToken(token);
+    } else {
+      await storage.clear();
+    }
   }
 
   Future<void> forgotPassword(String email) async {

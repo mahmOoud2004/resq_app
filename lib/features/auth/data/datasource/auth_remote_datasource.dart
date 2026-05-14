@@ -1,6 +1,9 @@
 import 'package:dio/dio.dart';
-import '../../../../core/network/dio_client.dart';
+import 'package:resq_app/core/error/app_logger.dart';
+import 'package:resq_app/core/error/error_handler.dart';
+
 import '../../../../core/network/api_constants.dart';
+import '../../../../core/network/dio_client.dart';
 import '../models/login_response_model.dart';
 
 class AuthRemoteDataSource {
@@ -11,23 +14,47 @@ class AuthRemoteDataSource {
     required String idNumber,
     required String password,
   }) async {
-    final response = await dio.post(
-      ApiConstants.login,
-      data: {"phone": phone, "id_number": idNumber, "password": password},
-    );
+    try {
+      final response = await dio.post(
+        ApiConstants.login,
+        data: {
+          "phone": phone.trim(),
+          "id_number": idNumber.trim(),
+          "password": password,
+        },
+      );
 
-    print(response.data);
+      if (response.data is! Map<String, dynamic>) {
+        throw const FormatException('Login response is invalid.');
+      }
 
-    return LoginResponseModel.fromJson(response.data);
+      return LoginResponseModel.fromJson(response.data as Map<String, dynamic>);
+    } catch (error, stackTrace) {
+      AppLogger.error(
+        'Login request failed.',
+        name: 'AuthRemoteDataSource',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw ErrorHandler.handle(error, stackTrace: stackTrace);
+    }
   }
 
   Future<void> forgotPassword(String email) async {
-    final response = await dio.post(
-      ApiConstants.forgotPassword,
-      data: {"email": email},
-    );
-
-    print("FORGOT PASSWORD RESPONSE: ${response.data}");
+    try {
+      await dio.post(
+        ApiConstants.forgotPassword,
+        data: {"email": email.trim()},
+      );
+    } catch (error, stackTrace) {
+      AppLogger.error(
+        'Forgot password request failed.',
+        name: 'AuthRemoteDataSource',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw ErrorHandler.handle(error, stackTrace: stackTrace);
+    }
   }
 
   Future<void> resetPassword({
@@ -35,16 +62,24 @@ class AuthRemoteDataSource {
     required String password,
     required String otp,
   }) async {
-    final response = await dio.post(
-      ApiConstants.resetPassword,
-      data: {
-        "email": email,
-        "otp": otp,
-        "password": password,
-        "password_confirmation": password,
-      },
-    );
-
-    print("RESET PASSWORD RESPONSE: ${response.data}");
+    try {
+      await dio.post(
+        ApiConstants.resetPassword,
+        data: {
+          "email": email.trim(),
+          "otp": otp.trim(),
+          "password": password,
+          "password_confirmation": password,
+        },
+      );
+    } catch (error, stackTrace) {
+      AppLogger.error(
+        'Reset password request failed.',
+        name: 'AuthRemoteDataSource',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw ErrorHandler.handle(error, stackTrace: stackTrace);
+    }
   }
 }

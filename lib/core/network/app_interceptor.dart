@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import '../storage/token_storage.dart';
+import '../error/app_logger.dart';
+import '../error/error_handler.dart';
 
 class AppInterceptor extends Interceptor {
   final TokenStorage storage;
@@ -22,6 +24,25 @@ class AppInterceptor extends Interceptor {
       options.headers["Authorization"] = "Bearer $token";
     }
 
-    super.onRequest(options, handler);
+    AppLogger.debug(
+      'Request ${options.method} ${options.uri}',
+      name: 'Network',
+    );
+
+    handler.next(options);
+  }
+
+  @override
+  void onError(DioException err, ErrorInterceptorHandler handler) {
+    final appException = ErrorHandler.handle(err);
+
+    AppLogger.error(
+      appException.developerMessage,
+      name: 'Network',
+      error: err,
+      stackTrace: err.stackTrace,
+    );
+
+    handler.next(err);
   }
 }

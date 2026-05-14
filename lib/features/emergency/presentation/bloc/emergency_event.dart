@@ -14,4 +14,8 @@ class SendEmergencyEvent extends EmergencyEvent {
   });
 }
 
-class GetActiveRequestEvent extends EmergencyEvent {}
+class GetActiveRequestEvent extends EmergencyEvent {
+  final bool forceRefresh;
+
+  GetActiveRequestEvent({this.forceRefresh = false});
+}

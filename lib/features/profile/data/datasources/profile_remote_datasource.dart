@@ -1,7 +1,11 @@
 import 'dart:io';
+
 import 'package:dio/dio.dart';
-import '../../../../core/network/dio_client.dart';
+import 'package:resq_app/core/error/app_logger.dart';
+import 'package:resq_app/core/error/error_handler.dart';
+
 import '../../../../core/network/api_constants.dart';
+import '../../../../core/network/dio_client.dart';
 import '../models/user_model.dart';
 
 abstract class ProfileRemoteDataSource {
@@ -20,11 +24,28 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
   @override
   Future<UserModel> getProfile() async {
-    final response = await dio.get(ApiConstants.profile);
+    try {
+      final response = await dio.get(ApiConstants.profile);
+      final data = response.data;
+      if (data is! Map<String, dynamic>) {
+        throw const FormatException('Profile response is invalid.');
+      }
 
-    final userJson = response.data["user"];
+      final userJson = data["user"];
+      if (userJson is! Map<String, dynamic>) {
+        throw const FormatException('Profile payload is invalid.');
+      }
 
-    return UserModel.fromJson(userJson);
+      return UserModel.fromJson(userJson);
+    } catch (error, stackTrace) {
+      AppLogger.error(
+        'Get profile failed.',
+        name: 'ProfileRemoteDataSource',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw ErrorHandler.handle(error, stackTrace: stackTrace);
+    }
   }
 
   @override
@@ -34,17 +55,23 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     required String confirmPassword,
     File? image,
   }) async {
-    FormData data = FormData.fromMap({
-      "phone": phone,
-      "password": password,
-      "password_confirmation": confirmPassword,
+    try {
+      final data = FormData.fromMap({
+        "phone": phone.trim(),
+        "password": password,
+        "password_confirmation": confirmPassword,
+        if (image != null) "image": await MultipartFile.fromFile(image.path),
+      });
 
-      if (image != null) "image": await MultipartFile.fromFile(image.path),
-    });
-
-    await dio.post(
-      ApiConstants.updateUser, // الأفضل استخدام constant
-      data: data,
-    );
+      await dio.post(ApiConstants.updateUser, data: data);
+    } catch (error, stackTrace) {
+      AppLogger.error(
+        'Update profile failed.',
+        name: 'ProfileRemoteDataSource',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw ErrorHandler.handle(error, stackTrace: stackTrace);
+    }
   }
 }

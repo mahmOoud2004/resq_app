@@ -1,10 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:resq_app/core/constants/app_color.dart';
+import 'package:resq_app/core/error/app_logger.dart';
+import 'package:resq_app/features/map/services/location_service.dart';
 
 class DriverMapCard extends StatefulWidget {
   const DriverMapCard({super.key});
@@ -14,21 +15,19 @@ class DriverMapCard extends StatefulWidget {
 }
 
 class _DriverMapCardState extends State<DriverMapCard> {
+  final LocationService _locationService = LocationService();
+
   LatLng? driverLocation;
-
   GoogleMapController? mapController;
-
   Timer? timer;
-
   Set<Marker> markers = {};
+  String? errorMessage;
 
   @override
   void initState() {
     super.initState();
-
     _getDriverLocation();
 
-    /// 🔥 تحديث كل 5 ثواني
     timer = Timer.periodic(
       const Duration(seconds: 5),
       (_) => _getDriverLocation(),
@@ -44,17 +43,14 @@ class _DriverMapCardState extends State<DriverMapCard> {
 
   Future<void> _getDriverLocation() async {
     try {
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-
+      final position = await _locationService.getCurrentLocation();
       final newLocation = LatLng(position.latitude, position.longitude);
 
       if (!mounted) return;
 
       setState(() {
         driverLocation = newLocation;
-
+        errorMessage = null;
         markers = {
           Marker(
             markerId: const MarkerId("driver"),
@@ -67,8 +63,18 @@ class _DriverMapCardState extends State<DriverMapCard> {
       });
 
       mapController?.animateCamera(CameraUpdate.newLatLng(newLocation));
-    } catch (e) {
-      debugPrint("LOCATION ERROR: $e");
+    } catch (error, stackTrace) {
+      AppLogger.error(
+        'Driver map location failed.',
+        name: 'DriverMapCard',
+        error: error,
+        stackTrace: stackTrace,
+      );
+
+      if (!mounted) return;
+      setState(() {
+        errorMessage = 'Unable to load driver location right now.';
+      });
     }
   }
 
@@ -77,43 +83,44 @@ class _DriverMapCardState extends State<DriverMapCard> {
     if (driverLocation == null) {
       return Container(
         height: 200,
-
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppColors.border),
         ),
-
-        child: const Center(child: CircularProgressIndicator()),
+        child: Center(
+          child: errorMessage == null
+              ? const CircularProgressIndicator()
+              : Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    errorMessage!,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.white70),
+                  ),
+                ),
+        ),
       );
     }
 
     return Container(
       height: 200,
-
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
       ),
-
       clipBehavior: Clip.hardEdge,
-
       child: GoogleMap(
         initialCameraPosition: CameraPosition(
           target: driverLocation!,
           zoom: 15,
         ),
-
         onMapCreated: (controller) {
           mapController = controller;
         },
-
         markers: markers,
-
         zoomControlsEnabled: false,
-
         myLocationEnabled: true,
-
         myLocationButtonEnabled: false,
       ),
     );

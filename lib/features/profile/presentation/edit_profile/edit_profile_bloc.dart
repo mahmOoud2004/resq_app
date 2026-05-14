@@ -1,5 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:resq_app/core/error/error_handler.dart';
 import 'package:resq_app/features/profile/domain/repositories/profile_repository.dart';
+
 import 'edit_profile_event.dart';
 import 'edit_profile_state.dart';
 
@@ -19,8 +21,9 @@ class EditProfileBloc extends Bloc<EditProfileEvent, EditProfileState> {
         );
 
         emit(EditProfileSuccess());
-      } catch (e) {
-        emit(EditProfileError(e.toString()));
+      } catch (error, stackTrace) {
+        final appException = ErrorHandler.handle(error, stackTrace: stackTrace);
+        emit(EditProfileError(appException.userMessage));
       }
     });
   }

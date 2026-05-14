@@ -165,7 +165,13 @@ class OtpScreen extends StatelessWidget {
                               ),
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
-                                  print("Resend OTP clicked");
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        "Resend OTP is not available yet.",
+                                      ),
+                                    ),
+                                  );
                                 },
                             ),
                           ],

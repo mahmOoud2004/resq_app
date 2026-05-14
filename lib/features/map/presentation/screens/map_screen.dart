@@ -1,10 +1,13 @@
 import 'package:dio/dio.dart';
-import 'package:resq_app/core/theme/theme_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
 import 'package:resq_app/core/constants/app_color.dart';
+import 'package:resq_app/core/error/app_logger.dart';
+import 'package:resq_app/core/error/error_handler.dart';
+import 'package:resq_app/core/network/api_constants.dart';
+import 'package:resq_app/core/theme/theme_ext.dart';
 import 'package:resq_app/features/emergency/presentation/bloc/emergency_bloc.dart';
 import 'package:resq_app/features/map/presentation/cubit/tracking_cubit.dart';
 import 'package:resq_app/features/map/presentation/cubit/tracking_state.dart';
@@ -24,9 +27,7 @@ class MapScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => TrackingCubit(
-        LocationService(),
-      ),
+      create: (_) => TrackingCubit(LocationService()),
       child: _MapScreenBody(
         lat: lat,
         lng: lng,
@@ -50,56 +51,72 @@ class _MapScreenBody extends StatefulWidget {
 
 class _MapScreenBodyState extends State<_MapScreenBody> {
   GoogleMapController? _mapController;
+  final Dio dio = Dio(
+    BaseOptions(
+      connectTimeout: const Duration(seconds: 15),
+      receiveTimeout: const Duration(seconds: 15),
+    ),
+  );
 
   bool isViewingDriver = false;
-
-  final Dio dio = Dio();
-
+  bool _loadingHospitals = false;
+  int? _trackedRequestId;
   Set<Marker> hospitalMarkers = {};
-
-  static const String googleApiKey = "AIzaSyAAb4fRMVjSBKfk71ejiHrWdFkHiJ72Nhg";
 
   @override
   void initState() {
     super.initState();
-
     context.read<EmergencyBloc>().add(GetActiveRequestEvent());
   }
 
   @override
   void dispose() {
     _mapController?.dispose();
-
     super.dispose();
   }
 
-  Future<void> _loadNearbyHospitals(
-    LatLng userLocation,
-  ) async {
-    try {
-      debugPrint("🏥 LOADING NEARBY HOSPITALS");
+  Future<void> _loadNearbyHospitals(LatLng userLocation) async {
+    if (_loadingHospitals || hospitalMarkers.isNotEmpty) {
+      return;
+    }
 
+    final apiKey = dotenv.env[ApiConstants.googleMapsApiKeyEnv]?.trim();
+    if (apiKey == null || apiKey.isEmpty) {
+      AppLogger.warning(
+        'Google Maps API key is missing. Skipping nearby hospitals.',
+        name: 'MapScreen',
+      );
+      return;
+    }
+
+    _loadingHospitals = true;
+    try {
       final url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
           "?location=${userLocation.latitude},${userLocation.longitude}"
           "&radius=5000"
           "&type=hospital"
-          "&key=$googleApiKey";
+          "&key=$apiKey";
 
       final response = await dio.get(url);
+      final data = response.data;
+      if (data is! Map<String, dynamic>) {
+        throw const FormatException('Hospitals response is invalid.');
+      }
 
-      final results = response.data["results"];
+      final results = data["results"];
+      if (results is! List) {
+        return;
+      }
 
-      Set<Marker> hospitals = {};
-
-      for (var hospital in results) {
-        final location = hospital["geometry"]["location"];
-
-        final lat = location["lat"];
-        final lng = location["lng"];
-
-        final name = hospital["name"];
-
-        debugPrint("🏥 HOSPITAL => $name");
+      final hospitals = <Marker>{};
+      for (final hospital in results) {
+        if (hospital is! Map) continue;
+        final geometry = hospital["geometry"];
+        final location = geometry is Map ? geometry["location"] : null;
+        final name = hospital["name"]?.toString() ?? "Hospital";
+        final lat = double.tryParse(location?["lat"]?.toString() ?? '');
+        final lng = double.tryParse(location?["lng"]?.toString() ?? '');
+        if (lat == null || lng == null) continue;
 
         hospitals.add(
           Marker(
@@ -108,24 +125,30 @@ class _MapScreenBodyState extends State<_MapScreenBody> {
             icon: BitmapDescriptor.defaultMarkerWithHue(
               BitmapDescriptor.hueGreen,
             ),
-            infoWindow: InfoWindow(
-              title: name,
-            ),
+            infoWindow: InfoWindow(title: name),
           ),
         );
       }
 
+      if (!mounted) return;
       setState(() {
         hospitalMarkers = hospitals;
       });
-
-      debugPrint(
-        "✅ HOSPITALS LOADED => ${hospitals.length}",
+    } catch (error, stackTrace) {
+      final appException = ErrorHandler.handle(error, stackTrace: stackTrace);
+      AppLogger.error(
+        'Failed to load nearby hospitals.',
+        name: 'MapScreen',
+        error: error,
+        stackTrace: stackTrace,
       );
-    } catch (e) {
-      debugPrint(
-        "❌ HOSPITALS ERROR => $e",
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(appException.userMessage)),
+        );
+      }
+    } finally {
+      _loadingHospitals = false;
     }
   }
 
@@ -139,17 +162,29 @@ class _MapScreenBodyState extends State<_MapScreenBody> {
 
         if (emergencyState is EmergencyHasActiveRequest) {
           driverName = emergencyState.request.driverName;
-
           driverPhone = emergencyState.request.driverPhone;
-
           status = emergencyState.request.status;
 
-          context.read<TrackingCubit>().startTrackingDriver(
-                emergencyState.request.id,
-              );
+          if (_trackedRequestId != emergencyState.request.id) {
+            _trackedRequestId = emergencyState.request.id;
+            context.read<TrackingCubit>().startTrackingDriver(
+                  emergencyState.request.id,
+                );
+          }
         }
 
-        return BlocBuilder<TrackingCubit, TrackingState>(
+        return BlocConsumer<TrackingCubit, TrackingState>(
+          listener: (context, trackingState) {
+            if (trackingState.userLocation != null && hospitalMarkers.isEmpty) {
+              _loadNearbyHospitals(trackingState.userLocation!);
+            }
+
+            if (trackingState.error != null && trackingState.error!.isNotEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(trackingState.error!)),
+              );
+            }
+          },
           builder: (context, trackingState) {
             return _buildMap(
               context,
@@ -174,54 +209,33 @@ class _MapScreenBodyState extends State<_MapScreenBody> {
     if (state.isLoading || state.userLocation == null) {
       return Scaffold(
         backgroundColor: context.backgroundColor,
-        body: const Center(
-          child: CircularProgressIndicator(),
-        ),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
-    /// تحميل المستشفيات مرة واحدة
-    if (hospitalMarkers.isEmpty) {
-      _loadNearbyHospitals(
-        state.userLocation!,
-      );
-    }
-
-    bool showDriverCard = status == "accepted" || status == "on_way";
-
-    Set<Marker> markers = {
+    final showDriverCard = status == "accepted" || status == "on_way";
+    final markers = <Marker>{
       Marker(
         markerId: const MarkerId('user_location'),
         position: state.userLocation!,
-        icon: BitmapDescriptor.defaultMarkerWithHue(
-          BitmapDescriptor.hueBlue,
-        ),
-        infoWindow: const InfoWindow(
-          title: 'Your Location',
-        ),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        infoWindow: const InfoWindow(title: 'Your Location'),
       ),
       ...hospitalMarkers,
     };
 
-    /// DRIVER MARKER
     if (state.driverLocation != null) {
       markers.add(
         Marker(
           markerId: const MarkerId('driver_location'),
           position: state.driverLocation!,
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-            BitmapDescriptor.hueRed,
-          ),
-          infoWindow: const InfoWindow(
-            title: 'Ambulance',
-          ),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+          infoWindow: const InfoWindow(title: 'Ambulance'),
         ),
       );
     }
 
-    /// ROUTE
-    Set<Polyline> polylines = {};
-
+    final polylines = <Polyline>{};
     if (state.routePoints.isNotEmpty) {
       polylines.add(
         Polyline(
@@ -244,10 +258,6 @@ class _MapScreenBodyState extends State<_MapScreenBody> {
             ),
             onMapCreated: (controller) {
               _mapController = controller;
-
-              debugPrint(
-                "🗺 MAP CREATED",
-              );
             },
             markers: markers,
             polylines: polylines,
@@ -262,37 +272,18 @@ class _MapScreenBodyState extends State<_MapScreenBody> {
               backgroundColor:
                   isViewingDriver ? AppColors.primary : AppColors.accent,
               onPressed: () {
-                if (state.driverLocation == null) {
-                  return;
-                }
+                if (state.driverLocation == null) return;
 
                 setState(() {
                   isViewingDriver = !isViewingDriver;
                 });
 
-                if (isViewingDriver) {
-                  debugPrint(
-                    "🚑 VIEW DRIVER",
-                  );
-
-                  _mapController?.animateCamera(
-                    CameraUpdate.newLatLngZoom(
-                      state.driverLocation!,
-                      15,
-                    ),
-                  );
-                } else {
-                  debugPrint(
-                    "👤 VIEW USER",
-                  );
-
-                  _mapController?.animateCamera(
-                    CameraUpdate.newLatLngZoom(
-                      state.userLocation!,
-                      15,
-                    ),
-                  );
-                }
+                _mapController?.animateCamera(
+                  CameraUpdate.newLatLngZoom(
+                    isViewingDriver ? state.driverLocation! : state.userLocation!,
+                    15,
+                  ),
+                );
               },
               child: Icon(
                 isViewingDriver ? Icons.person : Icons.local_taxi,

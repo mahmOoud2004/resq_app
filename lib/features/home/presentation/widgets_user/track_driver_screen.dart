@@ -1,12 +1,13 @@
 import 'dart:async';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import 'package:resq_app/core/error/app_logger.dart';
+import 'package:resq_app/core/error/error_handler.dart';
 import 'package:resq_app/core/network/dio_client.dart';
+import 'package:resq_app/features/map/services/location_service.dart';
 
 class TrackDriverScreen extends StatefulWidget {
   final int requestId;
@@ -26,45 +27,26 @@ class TrackDriverScreen extends StatefulWidget {
 
 class _TrackDriverScreenState extends State<TrackDriverScreen> {
   final dio = DioClient().dio;
+  final LocationService _locationService = LocationService();
 
   GoogleMapController? mapController;
-
   LatLng? driverLocation;
-
   LatLng? lastRouteDriverLocation;
-
   late LatLng userLocation;
-
   Set<Marker> markers = {};
-
   Set<Polyline> polylines = {};
-
-  int etaMinutes = 0;
-
+  String? etaText;
   bool driverArrived = false;
-
   String status = "pending";
-
+  String infoMessage = "Preparing live tracking...";
   Timer? trackingTimer;
 
   @override
   void initState() {
     super.initState();
-
-    userLocation = LatLng(
-      widget.userLat,
-      widget.userLng,
-    );
-
-    debugPrint(
-      "📍 USER LOCATION => "
-      "${userLocation.latitude}, "
-      "${userLocation.longitude}",
-    );
-
+    userLocation = LatLng(widget.userLat, widget.userLng);
     _getTracking();
 
-    /// 🔥 FETCH TRACKING EVERY 5 SECONDS
     trackingTimer = Timer.periodic(
       const Duration(seconds: 5),
       (_) => _getTracking(),
@@ -73,63 +55,36 @@ class _TrackDriverScreenState extends State<TrackDriverScreen> {
 
   @override
   void dispose() {
-    debugPrint("🛑 TRACK DRIVER CLOSED");
-
     trackingTimer?.cancel();
-
     mapController?.dispose();
-
     super.dispose();
   }
 
   Future<void> _getTracking() async {
     try {
-      debugPrint(
-        "🚑 FETCH TRACKING => ${widget.requestId}",
-      );
-
-      final response = await dio.get(
-        "/emergency/track-driver/${widget.requestId}",
-      );
-
-      debugPrint(
-        "📦 TRACK RESPONSE => ${response.data}",
-      );
-
+      final response = await dio.get("/emergency/track-driver/${widget.requestId}");
       final data = response.data;
+      if (data is! Map<String, dynamic>) {
+        throw const FormatException('Tracking response is invalid.');
+      }
 
-      status = data["request_status"] ?? "pending";
+      status = data["request_status"]?.toString() ?? "pending";
 
-      debugPrint("📌 STATUS => $status");
-
-      /// COMPLETED
       if (status == "completed") {
         if (!mounted) return;
 
         Navigator.pop(context);
-
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              "Trip Completed ✅",
-            ),
-          ),
+          const SnackBar(content: Text("Trip completed successfully.")),
         );
-
         return;
       }
 
-      /// ACCEPTED BUT NO DRIVER MOVEMENT YET
       if (status == "accepted") {
-        debugPrint(
-          "🚑 DRIVER ACCEPTED REQUEST",
-        );
-
+        if (!mounted) return;
         setState(() {
           driverLocation = null;
-
           polylines.clear();
-
           markers = {
             Marker(
               markerId: const MarkerId("user"),
@@ -139,115 +94,76 @@ class _TrackDriverScreenState extends State<TrackDriverScreen> {
               ),
             ),
           };
-
-          etaMinutes = 0;
+          etaText = null;
+          infoMessage = "Driver is preparing to move.";
         });
-
         return;
       }
 
       final driver = data["driver_location"];
-
-      if (driver == null) {
-        debugPrint(
-          "⚠️ DRIVER LOCATION IS NULL",
-        );
-
+      if (driver is! Map<String, dynamic>) {
         return;
       }
 
-      double driverLat = double.parse(
-        driver["lat"],
-      );
+      double driverLat = double.tryParse(driver["lat"].toString()) ?? 0;
+      double driverLng = double.tryParse(driver["lng"].toString()) ?? 0;
 
-      double driverLng = double.parse(
-        driver["lng"],
-      );
-
-      /// TEST FIX
-      if (driverLat == userLocation.latitude &&
-          driverLng == userLocation.longitude) {
-        debugPrint(
-          "⚠️ DRIVER & USER SAME LOCATION",
-        );
-
+      if (driverLat == userLocation.latitude && driverLng == userLocation.longitude) {
         driverLat += 0.0005;
         driverLng += 0.0005;
       }
 
-      final newDriverLocation = LatLng(
-        driverLat,
-        driverLng,
-      );
-
-      debugPrint(
-        "🚑 DRIVER LOCATION => "
-        "${newDriverLocation.latitude}, "
-        "${newDriverLocation.longitude}",
-      );
-
+      final newDriverLocation = LatLng(driverLat, driverLng);
       if (!mounted) return;
 
       driverLocation = newDriverLocation;
-
       _updateMarkers();
 
-      /// ROUTE UPDATE
-      bool shouldRequestRoute = false;
-
+      var shouldRequestRoute = false;
       if (lastRouteDriverLocation == null) {
         shouldRequestRoute = true;
       } else {
-        double movedDistance = Geolocator.distanceBetween(
+        final movedDistance = Geolocator.distanceBetween(
           lastRouteDriverLocation!.latitude,
           lastRouteDriverLocation!.longitude,
           driverLocation!.latitude,
           driverLocation!.longitude,
         );
-
-        debugPrint(
-          "📏 DRIVER MOVED => "
-          "$movedDistance meters",
-        );
-
-        if (movedDistance > 20) {
-          shouldRequestRoute = true;
-        }
+        shouldRequestRoute = movedDistance > 20;
       }
 
       if (shouldRequestRoute) {
-        debugPrint("🛣 UPDATING ROUTE");
-
         lastRouteDriverLocation = driverLocation;
-
-        _getRouteAndEta();
+        await _getRouteAndEta();
       }
-    } catch (e) {
-      debugPrint(
-        "❌ TRACK ERROR => $e",
+    } catch (error, stackTrace) {
+      final appException = ErrorHandler.handle(error, stackTrace: stackTrace);
+      AppLogger.error(
+        'Track driver flow failed.',
+        name: 'TrackDriverScreen',
+        error: error,
+        stackTrace: stackTrace,
       );
+
+      if (!mounted) return;
+      setState(() {
+        infoMessage = appException.userMessage;
+      });
     }
   }
 
   void _updateMarkers() {
     markers = {
-      /// USER
       Marker(
         markerId: const MarkerId("user"),
         position: userLocation,
-        icon: BitmapDescriptor.defaultMarkerWithHue(
-          BitmapDescriptor.hueBlue,
-        ),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
       ),
-
-      /// DRIVER
       if (driverLocation != null)
         Marker(
           markerId: const MarkerId("driver"),
           position: driverLocation!,
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-            BitmapDescriptor.hueRed,
-          ),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
         ),
     };
 
@@ -258,73 +174,49 @@ class _TrackDriverScreenState extends State<TrackDriverScreen> {
     if (driverLocation == null) return;
 
     try {
-      debugPrint("🛣 FETCH ROUTE & ETA");
-
-      final response = await Dio().get(
-        "https://api.openrouteservice.org/v2/directions/driving-car",
-        options: Options(
-          headers: {
-            "Authorization": "YOUR_API_KEY",
-          },
-        ),
-        queryParameters: {
-          "start": "${driverLocation!.longitude},"
-              "${driverLocation!.latitude}",
-          "end": "${userLocation.longitude},"
-              "${userLocation.latitude}",
-        },
-      );
-
-      final coords = response.data["features"][0]["geometry"]["coordinates"];
-
-      final duration =
-          response.data["features"][0]["properties"]["summary"]["duration"];
-
-      List<LatLng> points = coords.map<LatLng>((e) {
-        return LatLng(
-          e[1],
-          e[0],
-        );
-      }).toList();
-
-      double distance = Geolocator.distanceBetween(
+      final routeData = await _locationService.getRouteData(
         driverLocation!.latitude,
         driverLocation!.longitude,
         userLocation.latitude,
         userLocation.longitude,
       );
 
-      debugPrint(
-        "📏 DISTANCE TO USER => $distance",
+      final distance = Geolocator.distanceBetween(
+        driverLocation!.latitude,
+        driverLocation!.longitude,
+        userLocation.latitude,
+        userLocation.longitude,
       );
 
-      if (distance < 15) {
-        driverArrived = true;
-      } else {
-        driverArrived = false;
-      }
+      driverArrived = distance < 15;
 
+      if (!mounted) return;
       setState(() {
-        polylines = {
-          Polyline(
-            polylineId: const PolylineId("route"),
-            points: points,
-            width: 5,
-            color: Colors.blue,
-          ),
-        };
-
-        etaMinutes = (duration / 60).round();
+        polylines = routeData == null
+            ? {}
+            : {
+                Polyline(
+                  polylineId: const PolylineId("route"),
+                  points: routeData.points,
+                  width: 5,
+                  color: Colors.blue,
+                ),
+              };
+        etaText = routeData?.eta;
+        infoMessage = driverArrived
+            ? "Driver has arrived"
+            : (routeData?.eta != null
+                ? "Driver arriving in ${routeData!.eta}"
+                : "Driver is on the way.");
       });
 
-      debugPrint(
-        "⏱ ETA => $etaMinutes min",
-      );
-
       _moveCamera();
-    } catch (e) {
-      debugPrint(
-        "❌ ROUTE ERROR => $e",
+    } catch (error, stackTrace) {
+      AppLogger.error(
+        'Track driver route fetch failed.',
+        name: 'TrackDriverScreen',
+        error: error,
+        stackTrace: stackTrace,
       );
     }
   }
@@ -334,7 +226,7 @@ class _TrackDriverScreenState extends State<TrackDriverScreen> {
       return;
     }
 
-    LatLngBounds bounds = LatLngBounds(
+    final bounds = LatLngBounds(
       southwest: LatLng(
         driverLocation!.latitude < userLocation.latitude
             ? driverLocation!.latitude
@@ -354,21 +246,24 @@ class _TrackDriverScreenState extends State<TrackDriverScreen> {
     );
 
     mapController!.animateCamera(
-      CameraUpdate.newLatLngBounds(
-        bounds,
-        80,
-      ),
+      CameraUpdate.newLatLngBounds(bounds, 80),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final bannerText = status == "accepted"
+        ? "Driver is preparing..."
+        : driverArrived
+            ? "Driver has arrived"
+            : etaText != null
+                ? "Driver arriving in $etaText"
+                : infoMessage;
+
     return Scaffold(
       backgroundColor: const Color(0xFF07142A),
       appBar: AppBar(
-        title: const Text(
-          "Track Driver",
-        ),
+        title: const Text("Track Driver"),
       ),
       body: Stack(
         children: [
@@ -379,10 +274,6 @@ class _TrackDriverScreenState extends State<TrackDriverScreen> {
             ),
             onMapCreated: (controller) {
               mapController = controller;
-
-              debugPrint(
-                "🗺 TRACK MAP CREATED",
-              );
             },
             markers: markers,
             polylines: polylines,
@@ -401,13 +292,7 @@ class _TrackDriverScreenState extends State<TrackDriverScreen> {
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Text(
-                status == "accepted"
-                    ? "🚑 Driver is preparing..."
-                    : driverArrived
-                        ? "🚑 Driver has arrived"
-                        : (etaMinutes > 0
-                            ? "🚑 Driver arriving in $etaMinutes min"
-                            : "Calculating..."),
+                bannerText,
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,

@@ -1,3 +1,5 @@
+import 'package:resq_app/core/network/api_constants.dart';
+
 class UserModel {
   final String firstName;
   final String lastName;
@@ -9,9 +11,6 @@ class UserModel {
 
   final String? profileImage;
   final String? idCardImage;
-
-  static const String _baseImageUrl =
-      "https://feelinglessly-preocular-xochitl.ngrok-free.dev/storage/";
 
   UserModel({
     required this.firstName,
@@ -37,7 +36,9 @@ class UserModel {
       role: json["role"] ?? "user", // ⭐
 
       profileImage: profilePath,
-      idCardImage: idCardPath != null ? "$_baseImageUrl$idCardPath" : null,
+      idCardImage: idCardPath != null
+          ? "${ApiConstants.storageBaseUrl}$idCardPath"
+          : null,
     );
   }
 

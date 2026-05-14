@@ -1,4 +1,7 @@
 import 'package:dio/dio.dart';
+import 'package:resq_app/core/error/app_logger.dart';
+import 'package:resq_app/core/error/error_handler.dart';
+
 import '../models/chatbot_response_model.dart';
 
 class ChatbotRemoteDatasource {
@@ -12,27 +15,31 @@ class ChatbotRemoteDatasource {
     required double lat,
     required double lng,
   }) async {
-    print("=========== CHATBOT REQUEST ===========");
-    print("User ID: $userId");
-    print("Message: $message");
-    print("Lat: $lat");
-    print("Lng: $lng");
+    try {
+      final response = await dio.post(
+        "https://subpyramidical-nonsynodic-isiah.ngrok-free.dev/api/v1/mobile/chat",
+        data: {"user_id": userId, "message": message, "lat": lat, "lng": lng},
+        options: Options(
+          headers: {
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
+          },
+        ),
+      );
 
-    final response = await dio.post(
-      "https://subpyramidical-nonsynodic-isiah.ngrok-free.dev/api/v1/mobile/chat",
-      data: {"user_id": userId, "message": message, "lat": lat, "lng": lng},
-      options: Options(
-        headers: {
-          "Content-Type": "application/json",
-          "ngrok-skip-browser-warning": "true",
-        },
-      ),
-    );
+      if (response.data is! Map<String, dynamic>) {
+        throw const FormatException('Chatbot response is invalid.');
+      }
 
-    print("=========== SERVER RESPONSE ===========");
-    print(response.data);
-    print("=======================================");
-
-    return ChatbotResponseModel.fromJson(response.data);
+      return ChatbotResponseModel.fromJson(response.data as Map<String, dynamic>);
+    } catch (error, stackTrace) {
+      AppLogger.error(
+        'Chatbot request failed.',
+        name: 'ChatbotRemoteDatasource',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw ErrorHandler.handle(error, stackTrace: stackTrace);
+    }
   }
 }

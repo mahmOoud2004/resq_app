@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:resq_app/config/routers/route_names.dart';
+import 'package:resq_app/core/error/app_logger.dart';
+import 'package:resq_app/core/error/error_handler.dart';
 import 'package:resq_app/features/profile/data/datasources/profile_remote_datasource.dart';
 
 class AuthGateScreen extends StatefulWidget {
@@ -18,106 +20,84 @@ class _AuthGateScreenState extends State<AuthGateScreen> {
   @override
   void initState() {
     super.initState();
-    debugPrint("🚀 AuthGate started");
-    checkUser();
+    _checkUser();
   }
 
-  Future<void> checkUser() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    final token = prefs.getString("token");
-    final savedRole = prefs.getString("role");
-
-    debugPrint("🔑 TOKEN FROM PREFS: $token");
-    debugPrint("👤 ROLE FROM PREFS: $savedRole");
-
-    /// لو مفيش توكن
-    if (token == null || token.isEmpty) {
-      debugPrint("❌ No token -> redirect to LOGIN");
-
-      if (!mounted) return;
-      context.go(Routes.login);
-      return;
-    }
-
-    /// لو الرول محفوظ
-    if (savedRole != null && savedRole.isNotEmpty) {
-      debugPrint("✅ Using saved role: $savedRole");
-      navigateByRole(savedRole);
-      return;
-    }
-
-    /// غير كدا هجيب الرول من الـ API
+  Future<void> _checkUser() async {
     try {
-      debugPrint("🌐 Fetching profile from API...");
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString("token");
+      final savedRole = prefs.getString("role");
+
+      if (token == null || token.isEmpty) {
+        _go(Routes.login);
+        return;
+      }
+
+      if (savedRole != null && savedRole.trim().isNotEmpty) {
+        await _navigateByRole(savedRole);
+        return;
+      }
 
       final user = await profileApi.getProfile();
-      final role = user.role;
-
-      debugPrint("🎯 ROLE FROM API: $role");
-
+      final role = user.role.trim();
       await prefs.setString("role", role);
+      await _navigateByRole(role);
+    } catch (error, stackTrace) {
+      final appException = ErrorHandler.handle(error, stackTrace: stackTrace);
+      AppLogger.error(
+        'Auth gate failed.',
+        name: 'AuthGate',
+        error: error,
+        stackTrace: stackTrace,
+      );
 
-      navigateByRole(role);
-    } catch (e) {
-      debugPrint("🔥 PROFILE ERROR: $e");
-
+      final prefs = await SharedPreferences.getInstance();
       await prefs.remove("token");
       await prefs.remove("role");
 
-      if (!mounted) return;
-      context.go(Routes.login);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(appException.userMessage)),
+        );
+      }
+      _go(Routes.login);
     }
   }
 
-  void navigateByRole(String role) {
-    if (!mounted) return;
-
+  Future<void> _navigateByRole(String role) async {
     final normalizedRole = role.toLowerCase().trim();
+    if (normalizedRole == "user") {
+      await _checkMedicalProfileAndNavigate();
+      return;
+    }
 
-    debugPrint("➡️ NAVIGATE BY ROLE: $normalizedRole");
+    if (normalizedRole == "driver") {
+      _go("/driver-main");
+      return;
+    }
 
-    Future.microtask(() {
-      /// USER
-      if (normalizedRole == "user") {
-        debugPrint("👤 OPEN USER HOME");
-        _checkMedicalProfileAndNavigate();
-      }
+    if (normalizedRole == "admin") {
+      _go("/admin");
+      return;
+    }
 
-      /// DRIVER
-      else if (normalizedRole == "driver") {
-        debugPrint("🚑 OPEN DRIVER HOME");
-        context.go("/driver-main");
-      }
-
-      /// ADMIN
-      else if (normalizedRole == "admin") {
-        debugPrint("🛠 OPEN ADMIN PANEL");
-        context.go("/admin");
-      }
-
-      /// fallback
-      else {
-        debugPrint("⚠️ UNKNOWN ROLE -> LOGIN");
-        context.go(Routes.login);
-      }
-    });
+    _go(Routes.login);
   }
 
   Future<void> _checkMedicalProfileAndNavigate() async {
     final prefs = await SharedPreferences.getInstance();
-    // Assuming we use SharedPreferences key 'medical_profile_data'
-    // as defined in MedicalProfileStorage
     final hasMedicalProfile = prefs.containsKey('medical_profile_data');
+    _go(hasMedicalProfile ? Routes.home : Routes.medicalInfo);
+  }
 
+  void _go(String route) {
     if (!mounted) return;
-
-    if (!hasMedicalProfile) {
-      debugPrint("🩺 FIRST TIME: OPEN MEDICAL INFO");
-      context.go(Routes.medicalInfo);
-    } else {
-      context.go(Routes.home);
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.go(route);
+      }
+    });
   }
 
   @override

@@ -19,15 +19,14 @@ class ActiveRequestModel {
 
   factory ActiveRequestModel.fromJson(Map<String, dynamic> json) {
     final driver = json["driver"];
-
     return ActiveRequestModel(
-      id: json["id"],
-      status: json["status"],
-      serviceType: json["service_type"],
-      lat: double.parse(json["latitude"]),
-      lng: double.parse(json["longitude"]),
-      driverName: driver?["name"],
-      driverPhone: driver?["phone"],
+      id: json["id"] is int ? json["id"] as int : int.tryParse('${json["id"]}') ?? 0,
+      status: json["status"]?.toString() ?? "",
+      serviceType: json["service_type"]?.toString() ?? "",
+      lat: double.tryParse(json["latitude"].toString()) ?? 0,
+      lng: double.tryParse(json["longitude"].toString()) ?? 0,
+      driverName: driver is Map ? driver["name"]?.toString() : null,
+      driverPhone: driver is Map ? driver["phone"]?.toString() : null,
     );
   }
 }

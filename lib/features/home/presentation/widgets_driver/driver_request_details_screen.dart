@@ -11,6 +11,8 @@ class DriverRequestDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isOnline = context.watch<DriverEmergencyCubit>().isOnline;
+
     return Scaffold(
       backgroundColor: const Color(0xFF081A33),
 
@@ -124,13 +126,15 @@ class DriverRequestDetailsScreen extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
+                      backgroundColor: isOnline ? Colors.red : Colors.grey,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
                     ),
-                    onPressed: () async {
+                    onPressed: !isOnline
+                        ? null
+                        : () async {
                       await context.read<DriverEmergencyCubit>().accept(
                         request.id,
                       );

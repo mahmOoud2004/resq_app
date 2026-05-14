@@ -1,15 +1,33 @@
 import '../../data/models/driver_request_model.dart';
 
-abstract class DriverEmergencyState {}
+abstract class DriverEmergencyState {
+  final bool isOnline;
 
-class DriverEmergencyInitial extends DriverEmergencyState {}
+  const DriverEmergencyState({required this.isOnline});
+}
 
-class DriverEmergencyLoading extends DriverEmergencyState {}
+class DriverEmergencyInitial extends DriverEmergencyState {
+  const DriverEmergencyInitial({required super.isOnline});
+}
+
+class DriverEmergencyLoading extends DriverEmergencyState {
+  const DriverEmergencyLoading({required super.isOnline});
+}
 
 class DriverEmergencyLoaded extends DriverEmergencyState {
   final List<DriverRequestModel> requests;
 
-  DriverEmergencyLoaded(this.requests);
+  const DriverEmergencyLoaded(
+    this.requests, {
+    required super.isOnline,
+  });
 }
 
-class DriverEmergencyError extends DriverEmergencyState {}
+class DriverEmergencyError extends DriverEmergencyState {
+  final String? message;
+
+  const DriverEmergencyError({
+    required super.isOnline,
+    this.message,
+  });
+}

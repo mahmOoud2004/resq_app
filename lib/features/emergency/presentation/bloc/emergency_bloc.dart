@@ -1,4 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:resq_app/core/error/app_logger.dart';
+import 'package:resq_app/core/error/error_handler.dart';
 import 'package:resq_app/core/network/api_constants.dart';
 import 'package:resq_app/core/network/dio_client.dart';
 import 'package:resq_app/features/emergency/data/model/active_request_mode.dart';
@@ -11,6 +13,9 @@ class EmergencyBloc extends Bloc<EmergencyEvent, EmergencyState> {
   final CreateEmergencyUseCase createEmergency;
   final dio = DioClient().dio;
 
+  bool _isFetchingActiveRequest = false;
+  bool _isSendingRequest = false;
+
   EmergencyBloc(this.createEmergency) : super(EmergencyInitial()) {
     on<SendEmergencyEvent>(_sendEmergency);
     on<GetActiveRequestEvent>(_getActiveRequest);
@@ -20,6 +25,11 @@ class EmergencyBloc extends Bloc<EmergencyEvent, EmergencyState> {
     SendEmergencyEvent event,
     Emitter<EmergencyState> emit,
   ) async {
+    if (_isSendingRequest) {
+      return;
+    }
+
+    _isSendingRequest = true;
     emit(EmergencyLoading());
 
     try {
@@ -29,9 +39,18 @@ class EmergencyBloc extends Bloc<EmergencyEvent, EmergencyState> {
         lng: event.lng,
       );
 
-      add(GetActiveRequestEvent()); // 🔥 بعد الإنشاء اسحب الداتا
-    } catch (e) {
-      emit(EmergencyError(e.toString()));
+      add(GetActiveRequestEvent(forceRefresh: true));
+    } catch (error, stackTrace) {
+      final appException = ErrorHandler.handle(error, stackTrace: stackTrace);
+      AppLogger.error(
+        'Failed to create emergency request.',
+        name: 'EmergencyBloc',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      emit(EmergencyError(appException.userMessage));
+    } finally {
+      _isSendingRequest = false;
     }
   }
 
@@ -39,33 +58,52 @@ class EmergencyBloc extends Bloc<EmergencyEvent, EmergencyState> {
     GetActiveRequestEvent event,
     Emitter<EmergencyState> emit,
   ) async {
+    if (_isFetchingActiveRequest && !event.forceRefresh) {
+      return;
+    }
+
+    _isFetchingActiveRequest = true;
+
     try {
       final response = await dio.get(ApiConstants.getActiveRequest);
-
       final data = response.data;
 
-      if (data["has_active_request"] == true) {
-        final request = ActiveRequestModel.fromJson(data["request_details"]);
+      if (data is! Map<String, dynamic>) {
+        throw const FormatException('Active request response is invalid.');
+      }
 
-        /// 🔥 حالة إنهاء الطلب
+      if (data["has_active_request"] == true) {
+        final requestDetails = data["request_details"];
+        if (requestDetails is! Map<String, dynamic>) {
+          throw const FormatException('Request details are invalid.');
+        }
+
+        final request = ActiveRequestModel.fromJson(requestDetails);
         if (request.status == "completed") {
           emit(EmergencyCompleted());
           return;
         }
 
-        /// 🔥 حالة الإلغاء
         if (request.status == "cancelled") {
           emit(EmergencyInitial());
           return;
         }
 
-        /// باقي الحالات (pending / accepted / on_way)
         emit(EmergencyHasActiveRequest(request));
       } else {
         emit(EmergencyInitial());
       }
-    } catch (e) {
-      emit(EmergencyError(e.toString()));
+    } catch (error, stackTrace) {
+      final appException = ErrorHandler.handle(error, stackTrace: stackTrace);
+      AppLogger.error(
+        'Failed to fetch active emergency request.',
+        name: 'EmergencyBloc',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      emit(EmergencyError(appException.userMessage));
+    } finally {
+      _isFetchingActiveRequest = false;
     }
   }
 }
