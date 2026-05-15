@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/ai_analysis_result.dart';
-import '../../data/models/isar_collections.dart';
+import '../../data/models/hive_collections.dart';
 
 abstract class SmartAssistantState extends Equatable {
   const SmartAssistantState();
@@ -33,7 +33,7 @@ class SmartAssistantError extends SmartAssistantState {
 }
 
 class SmartAssistantHistoryLoaded extends SmartAssistantState {
-  final List<IsarAiResult> history;
+  final List<HiveAiResult> history;
   const SmartAssistantHistoryLoaded(this.history);
   @override
   List<Object?> get props => [history];

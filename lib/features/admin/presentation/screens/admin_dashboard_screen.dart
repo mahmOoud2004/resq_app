@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:resq_app/core/constants/app_color.dart';
 import 'package:resq_app/core/theme/theme_ext.dart';
+import 'package:resq_app/core/widgets/resolved_location_text.dart';
 
 import '../bloc/admin_bloc.dart';
 import '../bloc/admin_event.dart';
@@ -355,10 +356,13 @@ class _RequestCard extends StatelessWidget {
 
               const SizedBox(width: 8),
 
-              Text(
-                "$lat , $lng",
-
-                style: const TextStyle(color: Colors.white60),
+              Expanded(
+                child: ResolvedLocationText(
+                  latitude: double.tryParse(lat) ?? 0,
+                  longitude: double.tryParse(lng) ?? 0,
+                  maxLines: 2,
+                  style: const TextStyle(color: Colors.white60),
+                ),
               ),
             ],
           ),

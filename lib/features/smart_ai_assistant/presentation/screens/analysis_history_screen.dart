@@ -91,10 +91,10 @@ class _AnalysisHistoryScreenState extends State<AnalysisHistoryScreen> {
                       childrenPadding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 8),
                       children: [
-                        if (item.medications.isNotEmpty)
+                        if (item.medications != null && item.medications!.isNotEmpty)
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: item.medications
+                            children: item.medications!
                                 .map(
                                   (m) => Padding(
                                     padding: const EdgeInsets.only(bottom: 8),

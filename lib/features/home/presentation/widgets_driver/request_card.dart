@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:resq_app/core/theme/theme_ext.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:resq_app/core/constants/app_color.dart';
+import 'package:resq_app/core/theme/theme_ext.dart';
+import 'package:resq_app/core/widgets/resolved_location_text.dart';
 import 'package:resq_app/features/driver_emergency/data/models/driver_request_model.dart';
 import 'package:resq_app/features/driver_emergency/presentation/cubit/driver_emergency_cubit.dart';
 import 'package:resq_app/features/home/presentation/widgets_driver/driver_request_details_screen.dart';
 
 class RequestCard extends StatelessWidget {
-  final DriverRequestModel request; // 🔥 بدل int
+  final DriverRequestModel request;
   final String title;
-  final String distance;
-  final String location;
 
   const RequestCard({
     super.key,
     required this.request,
     required this.title,
-    required this.distance,
-    required this.location,
   });
 
   @override
@@ -33,7 +30,6 @@ class RequestCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          /// REQUEST INFO
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -48,9 +44,7 @@ class RequestCard extends StatelessWidget {
                     fontSize: 15,
                   ),
                 ),
-
                 const SizedBox(height: 6),
-
                 Row(
                   children: [
                     Icon(
@@ -59,10 +53,11 @@ class RequestCard extends StatelessWidget {
                       size: 16,
                     ),
                     const SizedBox(width: 4),
-
                     Expanded(
-                      child: Text(
-                        "$distance away · $location",
+                      child: ResolvedLocationText(
+                        latitude: request.latitude,
+                        longitude: request.longitude,
+                        prefix: 'Location: ',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -76,10 +71,7 @@ class RequestCard extends StatelessWidget {
               ],
             ),
           ),
-
           const SizedBox(width: 12),
-
-          /// VIEW BUTTON
           ElevatedButton(
             onPressed: () {
               Navigator.push(
@@ -87,9 +79,7 @@ class RequestCard extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (_) => BlocProvider.value(
                     value: context.read<DriverEmergencyCubit>(),
-                    child: DriverRequestDetailsScreen(
-                      request: request, // ✅ object كامل
-                    ),
+                    child: DriverRequestDetailsScreen(request: request),
                   ),
                 ),
               );

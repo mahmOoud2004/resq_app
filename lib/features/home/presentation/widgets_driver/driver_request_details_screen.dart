@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:resq_app/core/widgets/resolved_location_text.dart';
 import 'package:resq_app/features/driver_emergency/data/models/driver_request_model.dart';
 import 'package:resq_app/features/driver_emergency/presentation/cubit/driver_emergency_cubit.dart';
 import 'package:resq_app/features/home/presentation/widgets_driver/navigation_page.dart';
@@ -68,8 +69,10 @@ class DriverRequestDetailsScreen extends StatelessWidget {
                   const Icon(Icons.location_on, color: Colors.red),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: Text(
-                      "${request.latitude}, ${request.longitude}",
+                    child: ResolvedLocationText(
+                      latitude: request.latitude,
+                      longitude: request.longitude,
+                      maxLines: 2,
                       style: const TextStyle(color: Colors.white),
                     ),
                   ),

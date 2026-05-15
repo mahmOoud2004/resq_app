@@ -11,20 +11,20 @@ android {
 
     namespace = "com.example.resq_app"
 
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
 
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
 
-    sourceCompatibility =
-        JavaVersion.VERSION_17
+        sourceCompatibility =
+            JavaVersion.VERSION_17
 
-    targetCompatibility =
-        JavaVersion.VERSION_17
+        targetCompatibility =
+            JavaVersion.VERSION_17
 
-    isCoreLibraryDesugaringEnabled = true
-}
+        isCoreLibraryDesugaringEnabled = true
+    }
 
     kotlinOptions {
         jvmTarget =
@@ -40,7 +40,7 @@ android {
             flutter.minSdkVersion
 
         targetSdk =
-            flutter.targetSdkVersion
+            36
 
         versionCode =
             flutter.versionCode
@@ -52,6 +52,9 @@ android {
     buildTypes {
 
         release {
+
+            isMinifyEnabled = false
+            isShrinkResources = false
 
             signingConfig =
                 signingConfigs.getByName(
@@ -69,5 +72,21 @@ dependencies {
 
     coreLibraryDesugaring(
         "com.android.tools:desugar_jdk_libs:2.1.4"
+    )
+
+    implementation(
+        "com.google.mlkit:text-recognition-chinese:16.0.0"
+    )
+
+    implementation(
+        "com.google.mlkit:text-recognition-devanagari:16.0.0"
+    )
+
+    implementation(
+        "com.google.mlkit:text-recognition-japanese:16.0.0"
+    )
+
+    implementation(
+        "com.google.mlkit:text-recognition-korean:16.0.0"
     )
 }

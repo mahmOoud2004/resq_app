@@ -30,7 +30,7 @@ import 'package:resq_app/features/profile/presentation/screens/edit_profile_scre
 import 'package:resq_app/features/profile/presentation/screens/support_screen.dart';
 import 'package:resq_app/features/profile/presentation/screens/terms_screen.dart';
 import 'package:resq_app/features/smart_ai_assistant/data/datasources/gemini_remote_datasource.dart';
-import 'package:resq_app/features/smart_ai_assistant/data/datasources/isar_local_datasource.dart';
+import 'package:resq_app/features/smart_ai_assistant/data/datasources/hive_local_datasource.dart';
 import 'package:resq_app/features/smart_ai_assistant/data/datasources/ocr_local_datasource.dart';
 import 'package:resq_app/features/smart_ai_assistant/data/repositories/smart_assistant_repository_impl.dart';
 import 'package:resq_app/features/smart_ai_assistant/domain/entities/ai_analysis_result.dart';
@@ -49,7 +49,7 @@ SmartAssistantCubit createSmartAssistantCubit() {
     SmartAssistantRepositoryImpl(
       geminiRemoteDataSource: GeminiRemoteDataSource(),
       ocrLocalDataSource: OcrLocalDataSource(),
-      isarLocalDataSource: IsarLocalDataSource(),
+      hiveLocalDataSource: HiveLocalDataSource(),
     ),
   );
 }

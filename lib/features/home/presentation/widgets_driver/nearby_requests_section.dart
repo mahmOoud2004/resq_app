@@ -61,8 +61,6 @@ class NearbyRequestsSection extends StatelessWidget {
                       return RequestCard(
                         request: request,
                         title: request.serviceType,
-                        distance: "${request.latitude}, ${request.longitude}",
-                        location: "Emergency Location",
                       );
                     },
                   );
